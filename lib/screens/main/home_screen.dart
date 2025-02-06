@@ -1,7 +1,7 @@
 import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.dart';
 import 'package:emotion_check_in_app/models/emotion_check_in.dart';
-import 'package:emotion_check_in_app/provider/auth_provider.dart';
 import 'package:emotion_check_in_app/provider/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/screens/main/emotion_check_in_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
@@ -42,8 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final checkInProvider = context.watch<EmotionCheckInProvider>();
-    final userName =
-        context.watch<AuthProvider>().userName ?? ETexts.DEFAULT_TEXT;
+    final loginProvider = context.watch<LoginProvider>();
+    final userName = loginProvider.userName ?? "Guest"; // ✅ Use stored username
 
     return Scaffold(
       body: Padding(
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (shouldLogout) {
           /// Handle logout
-          await context.read<AuthProvider>().logout(context);
+          await context.read<LoginProvider>().logout(context);
         }
       },
       style: OutlinedButton.styleFrom(

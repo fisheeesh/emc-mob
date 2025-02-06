@@ -3,6 +3,7 @@ class ETexts {
   static const String AUTHORIZATION_ENDPOINT =
       'https://10.0.2.2:8443/security/auth';
   static const String LOGIN_ENDPOINT = 'https://10.0.2.2:8443/security/login';
+  static const String REFRESH_ENDPOINT = 'https://10.0.2.2:8443/security/refresh';
 
   // snack-bar text
   static const String COMMON_ERROR =
