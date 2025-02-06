@@ -77,14 +77,17 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       // resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(
-              left: ESizes.md, right: ESizes.md, top: ESizes.base),
+          padding: EHelperFunctions.isIOS()
+              ? const EdgeInsets.only(
+                  left: 28, right: 28, top: 75)
+              : const EdgeInsets.only(
+                  left: ESizes.md, right: ESizes.md, top: ESizes.base),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               /// header section
               _headerSection(context),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
               /// Tab Bar and Emoji Grid
               Container(
@@ -104,6 +107,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                   children: [
                     // Tab Bar
                     _tabBarSection(),
+                    SizedBox(height: 15,),
                     // Emoji Grid
                     _emojiGridSection(),
                   ],
@@ -230,7 +234,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           color: isSelected ? EColors.primary : Colors.transparent,
@@ -254,6 +258,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     final emotions = _emotions[_selectedTabIndex]!;
 
     return GridView.builder(
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -285,6 +290,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   emotion['icon'],

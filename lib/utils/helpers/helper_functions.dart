@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -41,5 +43,13 @@ class EHelperFunctions {
 
   static String getFormattedDate(DateTime date, String format) {
     return DateFormat(format).format(date);
+  }
+
+  static bool isIOS() {
+    return Platform.isIOS;
+  }
+
+  static bool isAndroid() {
+    return Platform.isAndroid;
   }
 }

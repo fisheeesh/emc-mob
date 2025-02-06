@@ -124,7 +124,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   CustomButton _toLogInPageButton(BuildContext context) {
     return CustomButton(
-      width: 298,
+      width: EHelperFunctions.isIOS() ? 280 : 298,
       height: ESizes.hNormal,
       child: Text(
         ETexts.LOGIN,

@@ -81,7 +81,7 @@ class AuthProvider extends ChangeNotifier {
         'Token': 'Bearer $accessToken',
       };
 
-      debugPrint("Requesting to URL: ${ETexts.AUTHORIZATION_ENDPOINT}");
+      debugPrint("Requesting to URL: ${ETexts.AUTHORIZATION_ENDPOINT_ANDROID}");
       debugPrint("Request Headers: $headers");
 
       /// Allow self-signed certificates during development (ONLY FOR DEVELOPMENT)
@@ -91,7 +91,7 @@ class AuthProvider extends ChangeNotifier {
 
       final response = await ioClient
           .post(
-        Uri.parse(ETexts.AUTHORIZATION_ENDPOINT),
+        Uri.parse(ETexts.AUTHORIZATION_ENDPOINT_ANDROID),
         headers: headers,
       )
           .timeout(const Duration(seconds: 30));

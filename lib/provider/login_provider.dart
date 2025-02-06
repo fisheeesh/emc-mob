@@ -18,7 +18,7 @@ class LoginProvider with ChangeNotifier {
   String? _authToken;
   String? get authToken => _authToken;
 
-  String? _userName;  // ✅ Store username
+  String? _userName;
   String? get userName => _userName;
 
   /// Logs in the user using email and password.
@@ -46,7 +46,7 @@ class LoginProvider with ChangeNotifier {
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(ETexts.LOGIN_ENDPOINT),
+        Uri.parse(EHelperFunctions.isIOS() ? ETexts.LOGIN_ENDPOINT_IOS : ETexts.LOGIN_ENDPOINT_ANDROID),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       ).timeout(const Duration(seconds: 30));
@@ -93,7 +93,7 @@ class LoginProvider with ChangeNotifier {
   void _decodeUserInfoFromToken(String token) {
     try {
       final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      _userName = decodedToken['sub']; // ✅ Extract username
+      _userName = decodedToken['sub'];
       notifyListeners();
 
       // Save username securely
@@ -135,7 +135,7 @@ class LoginProvider with ChangeNotifier {
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(ETexts.REFRESH_ENDPOINT),
+        Uri.parse(EHelperFunctions.isIOS() ? ETexts.LOGIN_ENDPOINT_IOS : ETexts.LOGIN_ENDPOINT_ANDROID),
         headers: {
           'Content-Type': 'application/json',
           'Refresh': storedRefreshToken,
@@ -148,7 +148,7 @@ class LoginProvider with ChangeNotifier {
 
         if (newAuthToken != null && newRefreshToken != null) {
           await _saveTokens(newAuthToken, newRefreshToken);
-          _decodeUserInfoFromToken(newAuthToken); // ✅ Decode username from refreshed token
+          _decodeUserInfoFromToken(newAuthToken);
           _authToken = newAuthToken;
           notifyListeners();
           debugPrint("Token refreshed successfully.");

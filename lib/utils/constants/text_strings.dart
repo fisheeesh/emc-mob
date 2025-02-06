@@ -1,9 +1,12 @@
 class ETexts {
   // server URL
-  static const String AUTHORIZATION_ENDPOINT =
-      'https://10.0.2.2:8443/security/auth';
-  static const String LOGIN_ENDPOINT = 'https://10.0.2.2:8443/security/login';
-  static const String REFRESH_ENDPOINT = 'https://10.0.2.2:8443/security/refresh';
+  static const String AUTHORIZATION_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/auth';
+  static const String LOGIN_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/login';
+  static const String REFRESH_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/refresh';
+
+  static const String AUTHORIZATION_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/auth';
+  static const String LOGIN_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/login';
+  static const String REFRESH_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/refresh';
 
   // snack-bar text
   static const String COMMON_ERROR =

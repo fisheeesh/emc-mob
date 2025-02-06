@@ -43,12 +43,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final checkInProvider = context.watch<EmotionCheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
-    final userName = loginProvider.userName ?? "Guest"; // ✅ Use stored username
+    final userName = loginProvider.userName ?? "Guest";
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(
-            left: ESizes.md, right: ESizes.md, top: ESizes.base),
+        padding: EHelperFunctions.isIOS()
+            ? const EdgeInsets.only(left: 28, right: 28, top: 75, bottom: 35)
+            : const EdgeInsets.only(
+                left: ESizes.md, right: ESizes.md, top: ESizes.base, bottom: ESizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             /// Check In Button
             _checkInButton(checkInProvider, userName),
-            const SizedBox(height: 15),
           ],
         ),
       ),
