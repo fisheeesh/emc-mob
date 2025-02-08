@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:emotion_check_in_app/enums/tokens.dart';
+import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/io_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:provider/provider.dart';
 
 class LoginProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -68,6 +70,7 @@ class LoginProvider with ChangeNotifier {
           _decodeUserInfoFromToken(authToken);
           _authToken = authToken;
           notifyListeners();
+          await context.read<CheckInProvider>().fetchCheckIns();
           return true;
         }
       } else {
@@ -287,6 +290,7 @@ class LoginProvider with ChangeNotifier {
     _authToken = null;
     _userName = null;
     notifyListeners();
+    await context.read<CheckInProvider>().clearData();
     if(context.mounted){
       EHelperFunctions.navigateToScreen(context, LoginScreen());
     }

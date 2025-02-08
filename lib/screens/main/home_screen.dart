@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Provider.of<CheckInProvider>(context, listen: false).fetchCheckIns();
+    Provider.of<CheckInProvider>(context, listen: false).loadCheckInsFromDB();
   }
 
   DateTime _selectedDay = DateTime.now();

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:emotion_check_in_app/database/database_helper.dart';
 import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
@@ -13,6 +14,7 @@ import 'package:http/http.dart' as http;
 
 class CheckInProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   List<CheckIn> _checkIns = [];
 
   List<CheckIn> get checkIns => _checkIns;
@@ -98,44 +100,63 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// Sends a check-in to the backend
-  Future<void> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
-    String moodMessage = "$emoji $feelingText";
-    final endpoint = EHelperFunctions.isIOS() ? ETexts.CHECK_IN_ENDPOINT_IOS : ETexts.CHECK_IN_ENDPOINT_ANDROID;
-
-    final response = await _makeAuthorizedRequest(
-      method: "POST",
-      endpoint: endpoint,
-      body: {"moodMessage": moodMessage},
-    );
-
-    if (response != null && response.statusCode == 200) {
-      debugPrint("Check-in successful: $moodMessage");
-    } else {
-      debugPrint("Failed to send check-in: ${response?.body}");
-    }
-  }
-
-  /// Fetches check-in data from the backend
+  /// **Fetch Check-Ins From API (Called Only After Login)**
   Future<void> fetchCheckIns() async {
     final endpoint = EHelperFunctions.isIOS() ? ETexts.HISTORY_ENDPOINT_IOS : ETexts.HISTORY_ENDPOINT_ANDROID;
-
-    final response = await _makeAuthorizedRequest(
-      method: "GET",
-      endpoint: endpoint,
-    );
+    final response = await _makeAuthorizedRequest(method: "GET", endpoint: endpoint);
 
     if (response != null && response.statusCode == 200) {
       List<String> timestamps = List<String>.from(jsonDecode(response.body));
       _checkIns = timestamps.map((timestamp) => CheckIn.fromJson({'timestamp': timestamp})).toList();
-      debugPrint("Check-ins fetched successfully: $_checkIns");
+
+      // **✅ Save Check-Ins to SQLite**
+      await _dbHelper.clearCheckIns();
+      for (var checkIn in _checkIns) {
+        await _dbHelper.insertCheckIn(checkIn);
+      }
+
+      debugPrint("Check-ins saved to SQLite: $_checkIns");
       notifyListeners();
     } else {
       debugPrint("Failed to fetch check-ins: ${response?.body}");
     }
   }
 
-  /// Get check-in by a specific date
+  /// **Load Check-Ins From SQLite for Home Screen**
+  Future<void> loadCheckInsFromDB() async {
+    _checkIns = await _dbHelper.getCheckIns();
+    notifyListeners();
+  }
+
+  /// **Submit Check-In**
+  Future<void> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
+    String moodMessage = "$emoji $feelingText";
+    final endpoint = EHelperFunctions.isIOS() ? ETexts.CHECK_IN_ENDPOINT_IOS : ETexts.CHECK_IN_ENDPOINT_ANDROID;
+
+    final response = await _makeAuthorizedRequest(method: "POST", endpoint: endpoint, body: {"moodMessage": moodMessage});
+
+    if (response != null && response.statusCode == 200) {
+      final checkIn = CheckIn(timestamp: DateTime.now());
+
+      // **✅ Save Check-In to SQLite**
+      _checkIns.add(checkIn);
+      await _dbHelper.insertCheckIn(checkIn);
+
+      notifyListeners();
+      debugPrint("Check-in saved locally: $moodMessage");
+    } else {
+      debugPrint("Failed to send check-in: ${response?.body}");
+    }
+  }
+
+  /// **Clear Data on Logout**
+  Future<void> clearData() async {
+    await _dbHelper.clearCheckIns();
+    _checkIns.clear();
+    notifyListeners();
+  }
+
+  /// **Get Check-In by Date**
   CheckIn? getCheckInByDate(DateTime date) {
     return _checkIns.cast<CheckIn?>().firstWhere(
           (checkIn) =>
@@ -146,7 +167,7 @@ class CheckInProvider with ChangeNotifier {
     );
   }
 
-  /// Get today's check-in
+  /// **Get Today's Check-In**
   CheckIn? get todayCheckIn {
     final today = DateTime.now();
     return _checkIns.cast<CheckIn?>().firstWhere(
