@@ -1,4 +1,4 @@
-import 'package:emotion_check_in_app/models/emotion_check_in.dart';
+import 'package:emotion_check_in_app/demo/emotion_check_in.dart';
 import 'package:flutter/material.dart';
 
 class EmotionCheckInProvider with ChangeNotifier {

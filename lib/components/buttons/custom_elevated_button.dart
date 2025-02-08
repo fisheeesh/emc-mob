@@ -11,7 +11,7 @@ class CustomElevatedButton extends StatelessWidget {
   });
 
   final void Function()? onPressed;
-  final String placeholder;
+  final Widget placeholder; // ✅ Accepts a Widget instead of String
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +24,11 @@ class CustomElevatedButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFFB4D2F1),
-              blurRadius: 10,
-              spreadRadius: 2,
-              offset: const Offset(0, 0)),
+            color: const Color(0xFFB4D2F1),
+            blurRadius: 10,
+            spreadRadius: 2,
+            offset: const Offset(0, 0),
+          ),
         ],
       ),
       child: Center(
@@ -40,16 +41,7 @@ class CustomElevatedButton extends StatelessWidget {
             ),
             minimumSize: const Size.fromHeight(100),
           ),
-          child: Text(
-            placeholder,
-            style: GoogleFonts.lexend(
-              textStyle: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                color: EColors.white,
-              ),
-            ),
-          ),
+          child: placeholder, // ✅ Now accepts any Widget
         ),
       ),
     );

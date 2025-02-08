@@ -1,4 +1,5 @@
-import 'package:emotion_check_in_app/provider/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/demo/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/screens/main/home_screen.dart';
@@ -16,16 +17,23 @@ void main() async {
   isViewed = prefs.getInt('onBoard');
 
   final loginProvider = LoginProvider();
+  final checkInProvider = CheckInProvider();
 
-  /// Check if user session is valid & restore username
+  /// Check if user session is valid
   bool isUserLoggedIn = await loginProvider.ensureValidToken();
-  await loginProvider.restoreUserName();
+  await loginProvider.restoreUserInfo();
+
+  // if (isUserLoggedIn) {
+  //   /// Fetch only if logged in
+  //   await checkInProvider.fetchCheckIns();
+  // }
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => loginProvider),
         ChangeNotifierProvider(create: (_) => EmotionCheckInProvider()),
+        ChangeNotifierProvider(create: (_) => checkInProvider),
       ],
       child: MyApp(isUserLoggedIn: isUserLoggedIn),
     ),

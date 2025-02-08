@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
@@ -21,6 +22,9 @@ class LoginProvider with ChangeNotifier {
   String? _userName;
   String? get userName => _userName;
 
+  String? _userEmail;
+  String? get userEmail => _userEmail;
+
   /// Logs in the user using email and password.
   ///
   /// This method sends a POST request to the authentication endpoint with the provided
@@ -36,26 +40,30 @@ class LoginProvider with ChangeNotifier {
   /// Returns:
   /// - `true` if login is successful and tokens are stored.
   /// - `false` if login fails.
-  Future<bool> loginWithEmailAndPassword(String email, String password) async {
+  Future<bool> loginWithEmailAndPassword(BuildContext context, String email, String password) async {
     try {
       _isLoading = true;
       notifyListeners();
 
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        ..badCertificateCallback = (X509Certificate cert, String host, int port) {
+          debugPrint("Allowing self-signed certificate for $host");
+          return true;
+        };
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
         Uri.parse(EHelperFunctions.isIOS() ? ETexts.LOGIN_ENDPOINT_IOS : ETexts.LOGIN_ENDPOINT_ANDROID),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
-        String? authToken = response.headers['authorization'];
-        String? refreshToken = response.headers['refresh'];
+        String? authToken = response.headers[ETexts.AUTHORIZATION];
+        String? refreshToken = response.headers[ETexts.REFRESH];
 
         if (authToken != null && refreshToken != null) {
+          // debugPrint('Refresh Token: $refreshToken');
           await _saveTokens(authToken, refreshToken);
           _decodeUserInfoFromToken(authToken);
           _authToken = authToken;
@@ -64,9 +72,25 @@ class LoginProvider with ChangeNotifier {
         }
       } else {
         debugPrint('Login failed: ${response.body}');
+        if(context.mounted){
+          EHelperFunctions.showSnackBar(context, response.body);
+        }
+      }
+    } on TimeoutException {
+      debugPrint('Login timeout: The request took too long to respond.');
+      if(context.mounted){
+        EHelperFunctions.showSnackBar(context, 'Request timed out. Please try again.');
+      }
+    } on SocketException {
+      debugPrint('Login error: No internet connection.');
+      if(context.mounted){
+        EHelperFunctions.showSnackBar(context, 'No internet connection. Please check your network.');
       }
     } catch (e) {
       debugPrint('Login error: $e');
+      if(context.mounted){
+        EHelperFunctions.showSnackBar(context, e.toString());
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -78,7 +102,7 @@ class LoginProvider with ChangeNotifier {
   /// Decodes and extracts user information from the JWT token.
   ///
   /// This method takes the authentication token, decodes it, and extracts the
-  /// username (from the 'sub' field). The extracted username is stored in memory
+  /// username (from the 'claims' field). The extracted username is stored in memory
   /// and securely saved using FlutterSecureStorage for persistence.
   ///
   /// If decoding fails (e.g., invalid or malformed token), it logs an error.
@@ -93,11 +117,13 @@ class LoginProvider with ChangeNotifier {
   void _decodeUserInfoFromToken(String token) {
     try {
       final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      _userName = decodedToken['sub'];
+      _userName = decodedToken['username'];
+      _userEmail = decodedToken['sub'];
       notifyListeners();
 
-      // Save username securely
-      _secureStorage.write(key: 'username', value: _userName);
+      // Save username and use email securely
+      _secureStorage.write(key: ETokens.userName.name, value: _userName);
+      _secureStorage.write(key: ETokens.userEmail.name, value: _userEmail);
     } catch (e) {
       debugPrint("Error decoding token: $e");
     }
@@ -123,7 +149,7 @@ class LoginProvider with ChangeNotifier {
   /// - Extracts and updates the username from the refreshed token.
   /// - Notifies listeners of changes.
   Future<bool> refreshToken() async {
-    String? storedRefreshToken = await _secureStorage.read(key: 'refresh_token');
+    String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) {
       debugPrint("No refresh token available.");
       return false;
@@ -135,16 +161,16 @@ class LoginProvider with ChangeNotifier {
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
-        Uri.parse(EHelperFunctions.isIOS() ? ETexts.LOGIN_ENDPOINT_IOS : ETexts.LOGIN_ENDPOINT_ANDROID),
+        Uri.parse(EHelperFunctions.isIOS() ? ETexts.REFRESH_ENDPOINT_IOS : ETexts.REFRESH_ENDPOINT_ANDROID),
         headers: {
           'Content-Type': 'application/json',
           'Refresh': storedRefreshToken,
         },
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
-        String? newAuthToken = response.headers['authorization'];
-        String? newRefreshToken = response.headers['refresh'];
+        String? newAuthToken = response.headers[ETexts.AUTHORIZATION];
+        String? newRefreshToken = response.headers[ETexts.REFRESH];
 
         if (newAuthToken != null && newRefreshToken != null) {
           await _saveTokens(newAuthToken, newRefreshToken);
@@ -164,58 +190,58 @@ class LoginProvider with ChangeNotifier {
     return false;
   }
 
-  /// Restores the stored username from secure storage.
+  /// Restores the stored userInfo from secure storage.
   ///
-  /// This method retrieves the username saved during a previous login session.
-  /// It updates the `_userName` variable and notifies listeners to reflect the change.
+  /// This method retrieves the username and user email saved during a previous login session.
+  /// It updates the `_userName` and ``_userEmail variables and notifies listeners to reflect the change.
   ///
-  /// If no username is found in storage, `_userName` remains `null`.
+  /// If either username or user email is not found in storage, both `_userName` and `_useEmail` remains `null`.
   ///
   /// Effects:
-  /// - Reads the username from FlutterSecureStorage.
-  /// - Updates `_userName` with the retrieved value.
+  /// - Reads the username and user email from FlutterSecureStorage.
+  /// - Updates `_userName` and `_userEmail` with the retrieved value.
   /// - Notifies listeners of the change.
-  Future<void> restoreUserName() async {
-    _userName = await _secureStorage.read(key: 'username');
+  Future<void> restoreUserInfo() async {
+    _userName = await _secureStorage.read(key: ETokens.userName.name);
+    _userEmail = await _secureStorage.read(key: ETokens.userEmail.name);
     notifyListeners();
   }
 
-  /// Ensures the authentication token is valid and refreshes it if needed.
+  /// Ensures the authentication token is valid, using the refresh token.
   ///
-  /// This method checks the expiration time of the stored authentication token.
-  /// If the token is set to expire within the next 30 minutes, it automatically
-  /// attempts to refresh it using the stored refresh token.
-  ///
-  /// If the token is still valid, it returns `true`. If the token is expired or
-  /// an error occurs, it returns `false`.
+  /// This method checks the stored refresh token's expiration time. If the refresh
+  /// token is still valid, it attempts to refresh the authentication token.
+  /// If the refresh token is expired, it returns `false`, forcing the user to log in again.
   ///
   /// Returns:
-  /// - `true` if the token is valid or successfully refreshed.
-  /// - `false` if the token is expired and cannot be refreshed.
+  /// - `true` if the refresh token is valid and the auth token is refreshed.
+  /// - `false` if the refresh token has expired or an error occurs.
   ///
   /// Effects:
-  /// - Reads the authentication token from secure storage.
-  /// - Decodes its expiration time and compares it with the current time.
-  /// - Calls `refreshToken()` if the expiration is within 30 minutes.
-  /// - Logs relevant messages for debugging.
+  /// - Reads the refresh token from FlutterSecureStorage.
+  /// - Checks its expiration time using JWT decoding.
+  /// - If expired, returns `false` to require user login.
+  /// - If valid, calls `refreshToken()` to update the auth token.
   Future<bool> ensureValidToken() async {
-    String? storedAuthToken = await _secureStorage.read(key: 'auth_token');
-    if (storedAuthToken == null) return false;
+    String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
+    if (storedRefreshToken == null) return false;
 
     try {
-      DateTime expirationTime = JwtDecoder.getExpirationDate(storedAuthToken);
+      // Check refresh token expiration
+      DateTime expirationTime = JwtDecoder.getExpirationDate(storedRefreshToken);
       Duration timeUntilExpiry = expirationTime.difference(DateTime.now());
 
-      // **Threshold: Refresh token if it expires within the next 30 minutes**
-      if (timeUntilExpiry.inMinutes <= 30) {
-        debugPrint("Token is about to expire in ${timeUntilExpiry.inMinutes} minutes. Refreshing...");
-        return await refreshToken();
+      // If refresh token is expired, return false (force login)
+      if (timeUntilExpiry.isNegative) {
+        debugPrint("Refresh token has expired. User needs to log in again.");
+        return false;
       }
 
-      debugPrint("Token is still valid for ${timeUntilExpiry.inMinutes} minutes.");
-      return true;
+      // If refresh token is still valid, attempt to refresh auth token
+      debugPrint("Refresh token is valid for ${timeUntilExpiry.inMinutes} minutes.");
+      return await refreshToken();
     } catch (e) {
-      debugPrint("Token validation error: $e");
+      debugPrint("Refresh token validation error: $e");
       return false;
     }
   }
@@ -233,8 +259,8 @@ class LoginProvider with ChangeNotifier {
   /// - Saves both tokens in secure storage.
   /// - Overwrites any existing stored tokens.
   Future<void> _saveTokens(String authToken, String refreshToken) async {
-    await _secureStorage.write(key: 'auth_token', value: authToken);
-    await _secureStorage.write(key: 'refresh_token', value: refreshToken);
+    await _secureStorage.write(key: ETokens.authToken.name, value: authToken);
+    await _secureStorage.write(key: ETokens.refreshToken.name, value: refreshToken);
   }
 
   /// Logs out the user and clears stored authentication data.
@@ -255,12 +281,14 @@ class LoginProvider with ChangeNotifier {
     _isLoading = false;
     notifyListeners();
 
-    await _secureStorage.delete(key: 'auth_token');
-    await _secureStorage.delete(key: 'refresh_token');
-    await _secureStorage.delete(key: 'username');
+    await _secureStorage.delete(key: ETokens.authToken.name);
+    await _secureStorage.delete(key: ETokens.refreshToken.name);
+    await _secureStorage.delete(key: ETokens.userName.name);
     _authToken = null;
     _userName = null;
     notifyListeners();
-    EHelperFunctions.navigateToScreen(context, LoginScreen());
+    if(context.mounted){
+      EHelperFunctions.navigateToScreen(context, LoginScreen());
+    }
   }
 }

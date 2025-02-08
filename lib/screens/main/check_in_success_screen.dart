@@ -6,6 +6,7 @@ import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CheckInSuccessScreen extends StatelessWidget {
   final String userName;
@@ -154,6 +155,15 @@ class CheckInSuccessScreen extends StatelessWidget {
         onPressed: () {
           EHelperFunctions.navigateToScreen(context, HomeScreen());
         },
-        placeholder: ETexts.HOME);
+        placeholder: Text(
+          ETexts.HOME,
+          style: GoogleFonts.lexend(
+            textStyle: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: EColors.white,
+            ),
+          ),
+        ));
   }
 }

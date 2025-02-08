@@ -1,6 +1,5 @@
 import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.dart';
-import 'package:emotion_check_in_app/models/emotion_check_in.dart';
-import 'package:emotion_check_in_app/provider/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/screens/main/emotion_check_in_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
@@ -21,6 +20,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Provider.of<CheckInProvider>(context, listen: false).fetchCheckIns();
+  }
+
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
@@ -41,22 +47,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final checkInProvider = context.watch<EmotionCheckInProvider>();
+    final checkInProvider = context.watch<CheckInProvider>();
     final loginProvider = context.watch<LoginProvider>();
     final userName = loginProvider.userName ?? "Guest";
+    final userEmail = loginProvider.userEmail ?? '@ata-it-th.com';
 
     return Scaffold(
       body: Padding(
         padding: EHelperFunctions.isIOS()
             ? const EdgeInsets.only(left: 28, right: 28, top: 75, bottom: 35)
             : const EdgeInsets.only(
-                left: ESizes.md, right: ESizes.md, top: ESizes.base, bottom: ESizes.md),
+                left: ESizes.md,
+                right: ESizes.md,
+                top: ESizes.base,
+                bottom: ESizes.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// Greeting and Logout Button
             _headerSection(userName, context),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             /// Calendar
             _calendarSection(checkInProvider),
@@ -74,24 +84,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _checkInButton(
-      EmotionCheckInProvider checkInProvider, String userName) {
+  Widget _checkInButton(CheckInProvider checkInProvider, String userName) {
     return CustomElevatedButton(
         onPressed: checkInProvider.todayCheckIn != null
             ? null
             : () {
-                final now = DateTime.now();
                 EHelperFunctions.navigateToScreen(
                     context,
                     EmotionCheckInScreen(
                       userName: userName,
-                      checkInTime: now,
                     ));
               },
-        placeholder: ETexts.CHECK_IN);
+        placeholder: Text(
+          ETexts.CHECK_IN,
+          style: GoogleFonts.lexend(
+            textStyle: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: EColors.white,
+            ),
+          ),
+        ));
   }
 
-  Widget _checkInInfoSection(EmotionCheckInProvider checkInProvider) {
+  Widget _checkInInfoSection(CheckInProvider checkInProvider) {
     final selectedDayCheckIn = checkInProvider.getCheckInByDate(_selectedDay);
 
     return Container(
@@ -136,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           /// Display user's selected day
                           EHelperFunctions.getFormattedDate(
-                              selectedDayCheckIn.checkInTime, 'MMMM d, yyyy'),
+                              selectedDayCheckIn.timestamp, 'MMMM d, yyyy'),
                           style: ETextTheme.lightTextTheme.labelMedium,
                         ),
                       ],
@@ -144,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 Text(
-                  '${selectedDayCheckIn.checkInTime.hour}:${selectedDayCheckIn.checkInTime.minute.toString().padLeft(2, '0')}',
+                  '${selectedDayCheckIn.timestamp.hour}:${selectedDayCheckIn.timestamp.minute.toString().padLeft(2, '0')}',
                   style: ETextTheme.lightTextTheme.titleMedium,
                 ),
               ],
@@ -158,17 +174,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _calendarSection(EmotionCheckInProvider checkInProvider) {
-    final checkInList = checkInProvider.checkInList;
+  Widget _calendarSection(CheckInProvider checkInProvider) {
+    final checkInList = checkInProvider.checkIns;
 
     /// Creates a map of check-in dates and their corresponding check-in types
     /// This ensures to highlight check-ins in calendar
     /// Allows to retrieve check-in type for a specific day
     /// Help to filter check-ins by month
-    Map<DateTime, CheckInType> checkInTypeMap = {
+    Map<DateTime, Color> checkInTypeMap = {
       for (var checkIn in checkInList)
-        DateTime(checkIn.checkInTime.year, checkIn.checkInTime.month,
-            checkIn.checkInTime.day): checkIn.checkInType,
+        DateTime(checkIn.timestamp.year, checkIn.timestamp.month,
+            checkIn.timestamp.day): EColors.onTimeColor
     };
 
     return Container(
@@ -243,10 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
               final checkInType =
                   checkInTypeMap[DateTime(day.year, day.month, day.day)];
 
-              if (checkInType == CheckInType.onTime) {
+              if (checkInType == EColors.onTimeColor) {
                 return _buildHighlightedDay(day, EColors.onTimeColor);
-              } else if (checkInType == CheckInType.late) {
-                return _buildHighlightedDay(day, EColors.lateColor);
               } else if (day.isAfter(DateTime.now())) {
                 /// Upcoming days
                 return _buildHighlightedDay(day, EColors.lightBlue);
@@ -260,10 +274,8 @@ class _HomeScreenState extends State<HomeScreen> {
               final checkInType =
                   checkInTypeMap[DateTime(day.year, day.month, day.day)];
 
-              if (checkInType == CheckInType.onTime) {
+              if (checkInType == EColors.onTimeColor) {
                 return _buildHighlightedDay(day, EColors.onTimeColor);
-              } else if (checkInType == CheckInType.late) {
-                return _buildHighlightedDay(day, EColors.lateColor);
               }
 
               /// Default text for days without check-in
@@ -330,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
         /// Show confirmation dialog
         final shouldLogout = await _showLogoutConfirmationDialog(context);
 
-        if (shouldLogout) {
+        if (shouldLogout && context.mounted) {
           /// Handle logout
           await context.read<LoginProvider>().logout(context);
         }

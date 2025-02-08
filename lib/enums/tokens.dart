@@ -1,1 +1,1 @@
-enum ETokens { authToken, refreshToken, userName }
+enum ETokens { authToken, refreshToken, userName, userEmail }

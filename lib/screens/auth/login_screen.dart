@@ -31,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final loginProvider = context.read<LoginProvider>();
 
       bool success = await loginProvider.loginWithEmailAndPassword(
+        context,
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -40,9 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
         EHelperFunctions.navigateToScreen(context, HomeScreen());
       } else {
         debugPrint("Login Failed!");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content:  Text("Invalid credentials. Please try again.")),
-        );
       }
     }
   }

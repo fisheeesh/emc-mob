@@ -3,10 +3,18 @@ class ETexts {
   static const String AUTHORIZATION_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/auth';
   static const String LOGIN_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/login';
   static const String REFRESH_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/security/refresh';
+  static const String HISTORY_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/mobile/checkins';
+  static const String CHECK_IN_ENDPOINT_ANDROID = 'https://10.0.2.2:8443/mobile/checkin';
 
-  static const String AUTHORIZATION_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/auth';
-  static const String LOGIN_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/login';
-  static const String REFRESH_ENDPOINT_IOS = 'https://192.168.1.190:8443/security/refresh';
+  static const String AUTHORIZATION_ENDPOINT_IOS = 'https://192.168.1.184:8443/security/auth';
+  static const String LOGIN_ENDPOINT_IOS = 'https://192.168.1.184:8443/security/login';
+  static const String REFRESH_ENDPOINT_IOS = 'https://192.168.1.184:8443/security/refresh';
+  static const String HISTORY_ENDPOINT_IOS = 'https://192.168.1.184:8443/mobile/checkins';
+  static const String CHECK_IN_ENDPOINT_IOS = 'https://192.168.1.184:8443/mobile/checkin';
+
+  // constants
+  static const String AUTHORIZATION = "authorization";
+  static const String REFRESH = "refresh";
 
   // snack-bar text
   static const String COMMON_ERROR =
@@ -54,7 +62,7 @@ class ETexts {
   static const String QUES = "How do you feel today?";
   static const String HINT = "explain how you feel that way...";
   static const String SUBMIT = "Submit";
-
+  static const String SUBMITTING = "Submitting...";
   // success screen
   static const String SUCCESS_MSG = "Check In Success!";
   static const String TIME = "Time";

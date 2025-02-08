@@ -1,5 +1,6 @@
 import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.dart';
-import 'package:emotion_check_in_app/provider/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/demo/emotion_check_in_provider.dart';
+import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/screens/main/check_in_success_screen.dart';
 import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
@@ -8,16 +9,15 @@ import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class EmotionCheckInScreen extends StatefulWidget {
   final String userName;
-  final DateTime checkInTime;
 
   const EmotionCheckInScreen({
     super.key,
     required this.userName,
-    required this.checkInTime,
   });
 
   @override
@@ -33,6 +33,8 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   String? _selectedLabel;
   final TextEditingController _feelingController = TextEditingController();
+
+  bool isLoading = false;
 
   /// List of emotions for each tab
   final Map<int, List<Map<String, dynamic>>> _emotions = {
@@ -78,8 +80,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
       body: SingleChildScrollView(
         child: Padding(
           padding: EHelperFunctions.isIOS()
-              ? const EdgeInsets.only(
-                  left: 28, right: 28, top: 75)
+              ? const EdgeInsets.only(left: 28, right: 28, top: 75)
               : const EdgeInsets.only(
                   left: ESizes.md, right: ESizes.md, top: ESizes.base),
           child: Column(
@@ -107,7 +108,9 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                   children: [
                     // Tab Bar
                     _tabBarSection(),
-                    SizedBox(height: 15,),
+                    SizedBox(
+                      height: 15,
+                    ),
                     // Emoji Grid
                     _emojiGridSection(),
                   ],
@@ -164,31 +167,66 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   Widget _submitButton() {
     return CustomElevatedButton(
-        onPressed: _selectedEmotion != null
-            ? () {
-                context.read<EmotionCheckInProvider>().addCheckIn(
-                      widget.userName,
-                      widget.checkInTime,
-                      _selectedEmotion!,
-                      _selectedLabel!,
-                      _feelingController.text,
-                    );
-                EHelperFunctions.navigateToScreen(
+      onPressed: _selectedEmotion != null && !isLoading
+          ? () async {
+              setState(() => isLoading = true); // Show loading indicator
+
+              await context.read<CheckInProvider>().sendCheckIn(
                     context,
-                    CheckInSuccessScreen(
-                      userName: widget.userName,
-                      checkInTime: widget.checkInTime,
-                      emoji: _selectedEmotion!,
-                      label: _selectedLabel!,
-                      feeling: _feelingController.text,
-                    ));
-                debugPrint('userName: ${widget.userName}');
-                debugPrint('time: ${widget.checkInTime}');
-                debugPrint('emoji: $_selectedEmotion');
-                debugPrint('label: $_selectedLabel');
-              }
-            : null,
-        placeholder: ETexts.SUBMIT);
+                    _selectedEmotion!,
+                    _feelingController.text,
+                  );
+
+              setState(() => isLoading = false); // Hide loading indicator
+
+              EHelperFunctions.navigateToScreen(
+                context,
+                CheckInSuccessScreen(
+                  userName: widget.userName,
+                  checkInTime: DateTime.now(),
+                  emoji: _selectedEmotion!,
+                  label: _selectedLabel!,
+                  feeling: _feelingController.text,
+                ),
+              );
+            }
+          : null, // Disable button while loading
+      placeholder: isLoading
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  ETexts.SUBMITTING,
+                  style: GoogleFonts.lexend(
+                    textStyle: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: EColors.white,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Text(
+              ETexts.SUBMIT,
+              style: GoogleFonts.lexend(
+                textStyle: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: EColors.white,
+                ),
+              ),
+            ),
+    );
   }
 
   Row _headerSection(BuildContext context) {
