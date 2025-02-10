@@ -12,14 +12,37 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/check_in.dart';
 import 'package:http/http.dart' as http;
 
+/// **CheckInProvider** manages user check-in data, API requests, and local database storage.
+///
+/// This provider:
+/// - Fetches check-ins from the server.
+/// - Stores check-ins locally using SQLite.
+/// - Sends new check-ins to the API.
+/// - Refreshes authentication tokens when needed.
+/// - Clears check-in data when the user logs out.
 class CheckInProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  List<CheckIn> _checkIns = [];
 
+  /// SQLite database helper instance for managing local storage.
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  List<CheckIn> _checkIns = [];
   List<CheckIn> get checkIns => _checkIns;
 
-  /// Common method for sending authorized requests
+  /// **Makes an authorized HTTP request with the stored token.**
+  ///
+  /// Ensures the authentication token is fresh and valid everytime before sending a request.
+  /// - If the token is expired or close to expiry (≤30 minutes), attempts to refresh it.
+  /// - Supports `GET` and `POST` requests.
+  ///
+  /// **Parameters:**
+  /// - `method`: HTTP method (`"GET"` or `"POST"`).
+  /// - `endpoint`: API endpoint URL.
+  /// - `body`: Optional request body for `POST` requests.
+  ///
+  /// **Returns:**
+  /// - `http.Response` if the request is successful.
+  /// - `null` if authentication fails or an error occurs.
   Future<http.Response?> _makeAuthorizedRequest({
     required String method,
     required String endpoint,
@@ -100,7 +123,10 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// **Fetch Check-Ins From API (Called Only After Login)**
+  /// **Fetches check-ins from the API after login.**
+  ///
+  /// - Retrieves check-ins from the server.
+  /// - Saves them to SQLite for offline access.
   Future<void> fetchCheckIns() async {
     final endpoint = EHelperFunctions.isIOS() ? ETexts.HISTORY_ENDPOINT_IOS : ETexts.HISTORY_ENDPOINT_ANDROID;
     final response = await _makeAuthorizedRequest(method: "GET", endpoint: endpoint);
@@ -128,7 +154,15 @@ class CheckInProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// **Submit Check-In**
+  /// **Submits a new check-in to the API.**
+  ///
+  /// - Saves the check-in to the API.
+  /// - Stores the check-in in SQLite for offline access.
+  ///
+  /// **Parameters:**
+  /// - `context`: The current `BuildContext`.
+  /// - `emoji`: The emoji representing the mood.
+  /// - `feelingText`: The text description of the mood.
   Future<void> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
     String moodMessage = "$emoji $feelingText";
     final endpoint = EHelperFunctions.isIOS() ? ETexts.CHECK_IN_ENDPOINT_IOS : ETexts.CHECK_IN_ENDPOINT_ANDROID;
@@ -149,14 +183,16 @@ class CheckInProvider with ChangeNotifier {
     }
   }
 
-  /// **Clear Data on Logout**
+  /// **Clears all stored check-in data after Logout.**
   Future<void> clearData() async {
     await _dbHelper.clearCheckIns();
     _checkIns.clear();
     notifyListeners();
   }
 
-  /// **Get Check-In by Date**
+  /// **Retrieves a check-in for a specific date.**
+  ///
+  /// **Returns:** A `CheckIn` object if found, otherwise `null`.
   CheckIn? getCheckInByDate(DateTime date) {
     return _checkIns.cast<CheckIn?>().firstWhere(
           (checkIn) =>
@@ -167,7 +203,9 @@ class CheckInProvider with ChangeNotifier {
     );
   }
 
-  /// **Get Today's Check-In**
+  /// **Retrieves today's check-in.**
+  ///
+  /// **Returns:** The `CheckIn` object if found, otherwise `null`.
   CheckIn? get todayCheckIn {
     final today = DateTime.now();
     return _checkIns.cast<CheckIn?>().firstWhere(

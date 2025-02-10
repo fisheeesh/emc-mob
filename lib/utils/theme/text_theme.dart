@@ -41,7 +41,7 @@ class ETextTheme {
     ),
     titleSmall: GoogleFonts.lexend(
       textStyle: TextStyle(
-        fontSize: 16,
+        fontSize: 14,
         color: EColors.black,
       ),
     ),

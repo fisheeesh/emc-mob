@@ -169,7 +169,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     return CustomElevatedButton(
       onPressed: _selectedEmotion != null && !isLoading
           ? () async {
-              setState(() => isLoading = true); // Show loading indicator
+              setState(() => isLoading = true);
 
               await context.read<CheckInProvider>().sendCheckIn(
                     context,
@@ -177,7 +177,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                     _feelingController.text,
                   );
 
-              setState(() => isLoading = false); // Hide loading indicator
+              setState(() => isLoading = false);
 
               EHelperFunctions.navigateToScreen(
                 context,

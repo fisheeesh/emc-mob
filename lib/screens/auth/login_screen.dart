@@ -25,17 +25,43 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
 
   bool _isPasswordVisible = false;
+  bool isLoading = false;
 
+  /// Handles the login process when the user submits the form.
+  ///
+  /// This method:
+  /// - Validates the form fields.
+  /// - Calls `loginWithEmailAndPassword()` from `LoginProvider` to authenticate the user.
+  /// - Updates the UI to show/hide the loading indicator.
+  /// - If login is successful, navigates to the `HomeScreen`.
+  /// - If login fails, it logs an error message.
+  ///
+  /// Effects:
+  /// - Uses `setState()` to manage the `isLoading` state.
+  /// - Calls `EHelperFunctions.navigateToScreen()` upon successful login.
   void _handleLogin() async {
+    /// Validate form input fields before proceeding
     if (_formKey.currentState?.validate() ?? false) {
       final loginProvider = context.read<LoginProvider>();
 
+      // Show loading indicator
+      setState(() {
+        isLoading = true;
+      });
+
+      // Attempt to log in with user-provided email and password
       bool success = await loginProvider.loginWithEmailAndPassword(
         context,
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
+      // Hide loading indicator after login attempt
+      setState(() {
+        isLoading = false;
+      });
+
+      // Handle login result
       if (success) {
         debugPrint("Login Successful!");
         EHelperFunctions.navigateToScreen(context, HomeScreen());
@@ -47,9 +73,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loginProvider = context.watch<LoginProvider>();
-    final bool isLoading = loginProvider.isLoading;
-
     return Stack(
       children: [
         Scaffold(
@@ -128,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
 
-        /// **Full-Screen Loading Overlay**
+        /// Full-Screen Loading Overlay**
         if (isLoading)
           Container(
             color: Colors.black.withOpacity(0.5),

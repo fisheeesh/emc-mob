@@ -12,11 +12,16 @@ import 'package:http/io_client.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:provider/provider.dart';
 
+/// **LoginProvider** is responsible for handling user authentication, token management, and login state.
+///
+/// This provider:
+/// - Manages user login/logout operations.
+/// - Stores and retrieves authentication tokens securely.
+/// - Handles token refresh logic.
+/// - Loads user data from secure storage.
+/// - Provides authentication status to the app.
 class LoginProvider with ChangeNotifier {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
 
   String? _authToken;
   String? get authToken => _authToken;
@@ -27,31 +32,19 @@ class LoginProvider with ChangeNotifier {
   String? _userEmail;
   String? get userEmail => _userEmail;
 
-  /// Logs in the user using email and password.
+  /// **Logs in the user using email and password.**
   ///
-  /// This method sends a POST request to the authentication endpoint with the provided
-  /// credentials. If the login is successful, it extracts the authentication token,
-  /// refresh token, and user information from the server's response headers.
+  /// This method sends a POST request to the authentication endpoint with the provided credentials.
+  /// If login is successful, it extracts the authentication and refresh tokens, decodes user details,
+  /// and stores them securely.
   ///
-  /// The tokens are securely stored using FlutterSecureStorage, and the username is
-  /// extracted from the JWT token and saved for future use.
-  ///
-  /// If login fails due to incorrect credentials, network issues, or server errors,
-  /// the method returns `false`.
-  ///
-  /// Returns:
-  /// - `true` if login is successful and tokens are stored.
-  /// - `false` if login fails.
+  /// **Returns:**
+  /// - `true` if login is successful.
+  /// - `false` if login fails (due to incorrect credentials, network issues, or server errors).
   Future<bool> loginWithEmailAndPassword(BuildContext context, String email, String password) async {
     try {
-      _isLoading = true;
-      notifyListeners();
-
       HttpClient httpClient = HttpClient()
-        ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-          debugPrint("Allowing self-signed certificate for $host");
-          return true;
-        };
+        ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
       IOClient ioClient = IOClient(httpClient);
 
       final response = await ioClient.post(
@@ -65,11 +58,11 @@ class LoginProvider with ChangeNotifier {
         String? refreshToken = response.headers[ETexts.REFRESH];
 
         if (authToken != null && refreshToken != null) {
-          // debugPrint('Refresh Token: $refreshToken');
           await _saveTokens(authToken, refreshToken);
           _decodeUserInfoFromToken(authToken);
           _authToken = authToken;
           notifyListeners();
+          /// Send request to server only when user do login and successfully login to avoid unnecessary api calss
           await context.read<CheckInProvider>().fetchCheckIns();
           return true;
         }
@@ -94,29 +87,16 @@ class LoginProvider with ChangeNotifier {
       if(context.mounted){
         EHelperFunctions.showSnackBar(context, e.toString());
       }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
-
     return false;
   }
 
-  /// Decodes and extracts user information from the JWT token.
+  /// **Decodes user information from the JWT token and stores it.**
   ///
-  /// This method takes the authentication token, decodes it, and extracts the
-  /// username (from the 'claims' field). The extracted username is stored in memory
-  /// and securely saved using FlutterSecureStorage for persistence.
+  /// Extracts the username and email from the token payload and saves them securely.
   ///
-  /// If decoding fails (e.g., invalid or malformed token), it logs an error.
-  ///
-  /// Parameters:
+  /// **Parameters:**
   /// - `token`: The JWT authentication token received from the server.
-  ///
-  /// Effects:
-  /// - Updates `_userName` with the extracted username.
-  /// - Saves the username securely for future use.
-  /// - Notifies listeners of changes.
   void _decodeUserInfoFromToken(String token) {
     try {
       final Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
@@ -124,7 +104,7 @@ class LoginProvider with ChangeNotifier {
       _userEmail = decodedToken['sub'];
       notifyListeners();
 
-      // Save username and use email securely
+      /// Save username and use email securely
       _secureStorage.write(key: ETokens.userName.name, value: _userName);
       _secureStorage.write(key: ETokens.userEmail.name, value: _userEmail);
     } catch (e) {
@@ -132,25 +112,13 @@ class LoginProvider with ChangeNotifier {
     }
   }
 
-  /// Refreshes the authentication token using the stored refresh token.
+  /// **Refreshes the authentication token using the stored refresh token.**
   ///
-  /// This method retrieves the refresh token from secure storage and sends a request
-  /// to the server's refresh endpoint. If the refresh is successful, it extracts and
-  /// stores the new authentication and refresh tokens, then decodes the username from
-  /// the new token.
+  /// If the refresh token is valid, it requests a new authentication token and updates stored credentials.
   ///
-  /// If the refresh token is missing, expired, or invalid, the method logs an error
-  /// and returns `false`.
-  ///
-  /// Returns:
-  /// - `true` if the token refresh is successful and new tokens are stored.
-  /// - `false` if the refresh token is missing, expired, or the request fails.
-  ///
-  /// Effects:
-  /// - Updates `_authToken` with the new authentication token.
-  /// - Saves new tokens securely in FlutterSecureStorage.
-  /// - Extracts and updates the username from the refreshed token.
-  /// - Notifies listeners of changes.
+  /// **Returns:**
+  /// - `true` if the token refresh is successful.
+  /// - `false` if the refresh token is invalid or expired.
   Future<bool> refreshToken() async {
     String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) {
@@ -193,38 +161,28 @@ class LoginProvider with ChangeNotifier {
     return false;
   }
 
-  /// Restores the stored userInfo from secure storage.
+  /// **Restores the stored user info from secure storage.**
   ///
-  /// This method retrieves the username and user email saved during a previous login session.
-  /// It updates the `_userName` and ``_userEmail variables and notifies listeners to reflect the change.
-  ///
-  /// If either username or user email is not found in storage, both `_userName` and `_useEmail` remains `null`.
-  ///
-  /// Effects:
-  /// - Reads the username and user email from FlutterSecureStorage.
-  /// - Updates `_userName` and `_userEmail` with the retrieved value.
-  /// - Notifies listeners of the change.
+  /// If user data exists, it updates `_userName` and `_userEmail`, otherwise, they remain `null`.
   Future<void> restoreUserInfo() async {
     _userName = await _secureStorage.read(key: ETokens.userName.name);
     _userEmail = await _secureStorage.read(key: ETokens.userEmail.name);
     notifyListeners();
   }
 
-  /// Ensures the authentication token is valid, using the refresh token.
+
+  /// **Ensures the authentication token is valid.**
   ///
-  /// This method checks the stored refresh token's expiration time. If the refresh
-  /// token is still valid, it attempts to refresh the authentication token.
-  /// If the refresh token is expired, it returns `false`, forcing the user to log in again.
+  /// If the refresh token is still valid, it refreshes the authentication token.
+  /// Continuously refresh the authentication token as long as the user is active.
   ///
-  /// Returns:
-  /// - `true` if the refresh token is valid and the auth token is refreshed.
-  /// - `false` if the refresh token has expired or an error occurs.
+  /// - If the user remains active, their session is extended by refreshing the token.
+  /// - If the user is inactive for **1 week**, they will be required to log in again.
+  /// - This ensures secure, time-limited access without forcing frequent logins.
   ///
-  /// Effects:
-  /// - Reads the refresh token from FlutterSecureStorage.
-  /// - Checks its expiration time using JWT decoding.
-  /// - If expired, returns `false` to require user login.
-  /// - If valid, calls `refreshToken()` to update the auth token.
+  /// **Returns:**
+  /// - `true` if the token refresh is successful.
+  /// - `false` if the refresh token has expired.
   Future<bool> ensureValidToken() async {
     String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) return false;
@@ -242,6 +200,7 @@ class LoginProvider with ChangeNotifier {
 
       // If refresh token is still valid, attempt to refresh auth token
       debugPrint("Refresh token is valid for ${timeUntilExpiry.inMinutes} minutes.");
+
       return await refreshToken();
     } catch (e) {
       debugPrint("Refresh token validation error: $e");
@@ -266,24 +225,11 @@ class LoginProvider with ChangeNotifier {
     await _secureStorage.write(key: ETokens.refreshToken.name, value: refreshToken);
   }
 
-  /// Logs out the user and clears stored authentication data.
+  /// **Logs out the user and clears stored authentication data.**
   ///
-  /// This method removes all stored authentication details, including the
-  /// authentication token, refresh token, and username. It also resets
-  /// `_authToken` and `_userName` to `null`, ensuring the user is fully logged out.
-  ///
-  /// After clearing credentials, it navigates the user back to the `LoginScreen`.
-  ///
-  /// Effects:
-  /// - Resets `_isLoading` to `false`.
-  /// - Deletes stored tokens and username from secure storage.
-  /// - Updates `_authToken` and `_userName` to `null`.
-  /// - Notifies listeners to reflect the logout state.
-  /// - Redirects the user to the `LoginScreen`.
+  /// After logging out, it navigates the user back to the `LoginScreen`.
+  /// Clear all tokens from FlutterSecureStorage and clear user's check-in data from sqlite.
   Future<void> logout(BuildContext context) async {
-    _isLoading = false;
-    notifyListeners();
-
     await _secureStorage.delete(key: ETokens.authToken.name);
     await _secureStorage.delete(key: ETokens.refreshToken.name);
     await _secureStorage.delete(key: ETokens.userName.name);

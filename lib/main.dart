@@ -12,25 +12,29 @@ import 'package:emotion_check_in_app/database/database_helper.dart';
 
 int? isViewed;
 
+/// The entry point of the ATA-EmotionCheck-in application.
+///
+/// This method initializes essential services, checks user authentication status,
+/// and determines the appropriate starting screen before launching the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// ✅ Initialize Database Properly
-  await DatabaseHelper.instance.database; // Ensures DB and tables are ready
+  /// Initialize the SQLite database before the app starts.
+  await DatabaseHelper.instance.database;
 
-  /// ✅ Load SharedPreferences
+  /// Retrieve shared preferences to check if the onboarding screen has been viewed.
   SharedPreferences prefs = await SharedPreferences.getInstance();
   isViewed = prefs.getInt('onBoard');
 
   final loginProvider = LoginProvider();
   final checkInProvider = CheckInProvider();
 
-  /// ✅ Check if user session is valid
+  /// Check if the user has a valid authentication token.
   bool isUserLoggedIn = await loginProvider.ensureValidToken();
-  await loginProvider.restoreUserInfo();
 
-  /// ✅ Load Check-Ins from SQLite (if logged in)
+  /// If the user is logged in, load check-in records from the local database.
   if (isUserLoggedIn) {
+    await loginProvider.restoreUserInfo();
     await checkInProvider.loadCheckInsFromDB();
   }
 
