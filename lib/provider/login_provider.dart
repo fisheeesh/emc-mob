@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
+import 'package:emotion_check_in_app/utils/constants/debug.dart';
+import 'package:emotion_check_in_app/utils/constants/status.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
 import 'package:emotion_check_in_app/utils/constants/urls.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
@@ -52,7 +54,7 @@ class LoginProvider with ChangeNotifier {
         Uri.parse(EHelperFunctions.isIOS() ? EUrls.LOGIN_ENDPOINT_IOS : EUrls.LOGIN_ENDPOINT_ANDROID),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 60));
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         String? authToken = response.headers[ETexts.AUTHORIZATION];
@@ -74,14 +76,14 @@ class LoginProvider with ChangeNotifier {
         }
       }
     } on TimeoutException {
-      debugPrint('Login timeout: The request took too long to respond.');
+      debugPrint(EDebug.REQ_TIME_OUT);
       if(context.mounted){
-        EHelperFunctions.showSnackBar(context, 'Request timed out. Please try again.');
+        EHelperFunctions.showSnackBar(context, EStatus.REQ_TIME_OUT);
       }
     } on SocketException {
-      debugPrint('Login error: No internet connection.');
+      debugPrint(EDebug.NO_INTERNET);
       if(context.mounted){
-        EHelperFunctions.showSnackBar(context, 'No internet connection. Please check your network.');
+        EHelperFunctions.showSnackBar(context, EStatus.NO_INTERNET);
       }
     } catch (e) {
       debugPrint('Login error: $e');
@@ -123,7 +125,7 @@ class LoginProvider with ChangeNotifier {
   Future<bool> refreshToken() async {
     String? storedRefreshToken = await _secureStorage.read(key: ETokens.refreshToken.name);
     if (storedRefreshToken == null) {
-      debugPrint("No refresh token available.");
+      debugPrint(EDebug.NO_REFRESH_TOKEN);
       return false;
     }
 
@@ -149,7 +151,7 @@ class LoginProvider with ChangeNotifier {
           _decodeUserInfoFromToken(newAuthToken);
           _authToken = newAuthToken;
           notifyListeners();
-          debugPrint("Token refreshed successfully.");
+          debugPrint(EDebug.SUC_REFRESH);
           return true;
         }
       } else {
@@ -195,7 +197,7 @@ class LoginProvider with ChangeNotifier {
 
       // If refresh token is expired, return false (force login)
       if (timeUntilExpiry.isNegative) {
-        debugPrint("Refresh token has expired. User needs to log in again.");
+        debugPrint(EDebug.REFRESH_EXP);
         return false;
       }
 

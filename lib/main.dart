@@ -6,7 +6,6 @@ import 'package:emotion_check_in_app/screens/main/home_screen.dart';
 import 'package:emotion_check_in_app/screens/onBoard/on_boarding_screen.dart';
 import 'package:emotion_check_in_app/utils/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:emotion_check_in_app/database/database_helper.dart';
@@ -64,14 +63,4 @@ class MyApp extends StatelessWidget {
       home: isViewed != 0 ? OnBoardingScreen() : isUserLoggedIn ? const HomeScreen() : const LoginScreen(),
     );
   }
-
-  final _router = GoRouter(
-      initialLocation: '/',
-      debugLogDiagnostics: true,
-      routes: [
-        GoRoute(
-            name: 'home',
-            path: '/',
-            builder: (context, state) => const HomeScreen(),)
-      ]);
 }

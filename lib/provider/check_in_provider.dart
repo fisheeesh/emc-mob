@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:emotion_check_in_app/database/database_helper.dart';
 import 'package:emotion_check_in_app/enums/tokens.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
-import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/constants/status.dart';
 import 'package:emotion_check_in_app/utils/constants/urls.dart';
 import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:flutter/material.dart';
@@ -110,9 +110,9 @@ class CheckInProvider with ChangeNotifier {
 
     try {
       if (method == "POST") {
-        response = await ioClient.post(uri, headers: headers, body: jsonEncode(body));
+        response = await ioClient.post(uri, headers: headers, body: jsonEncode(body)).timeout(const Duration(seconds: 30));
       } else if (method == "GET") {
-        response = await ioClient.get(uri, headers: headers);
+        response = await ioClient.get(uri, headers: headers).timeout(const Duration(seconds: 30));
       } else {
         debugPrint("Unsupported HTTP method: $method");
         return null;
@@ -136,7 +136,7 @@ class CheckInProvider with ChangeNotifier {
       List<String> timestamps = List<String>.from(jsonDecode(response.body));
       _checkIns = timestamps.map((timestamp) => CheckIn.fromJson({'timestamp': timestamp})).toList();
 
-      // **✅ Save Check-Ins to SQLite**
+      // Save Check-Ins to SQLite
       await _dbHelper.clearCheckIns();
       for (var checkIn in _checkIns) {
         await _dbHelper.insertCheckIn(checkIn);
@@ -164,7 +164,7 @@ class CheckInProvider with ChangeNotifier {
   /// - `context`: The current `BuildContext`.
   /// - `emoji`: The emoji representing the mood.
   /// - `feelingText`: The text description of the mood.
-  Future<void> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
+  Future<bool> sendCheckIn(BuildContext context, String emoji, String feelingText) async {
     String moodMessage = "$emoji $feelingText";
     final endpoint = EHelperFunctions.isIOS() ? EUrls.CHECK_IN_ENDPOINT_IOS : EUrls.CHECK_IN_ENDPOINT_ANDROID;
 
@@ -173,14 +173,17 @@ class CheckInProvider with ChangeNotifier {
     if (response != null && response.statusCode == 200) {
       final checkIn = CheckIn(timestamp: DateTime.now());
 
-      // **✅ Save Check-In to SQLite**
+      // Save Check-In to SQLite
       _checkIns.add(checkIn);
       await _dbHelper.insertCheckIn(checkIn);
 
       notifyListeners();
       debugPrint("Check-in saved locally: $moodMessage");
+      return true;
     } else {
       debugPrint("Failed to send check-in: ${response?.body}");
+      EHelperFunctions.showSnackBar(context, EStatus.COMMON_ERROR);
+      return false;
     }
   }
 

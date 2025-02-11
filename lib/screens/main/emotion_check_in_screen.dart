@@ -171,7 +171,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           ? () async {
               setState(() => isLoading = true);
 
-              await context.read<CheckInProvider>().sendCheckIn(
+              var isSuccess = await context.read<CheckInProvider>().sendCheckIn(
                     context,
                     _selectedEmotion!,
                     _feelingController.text,
@@ -179,18 +179,20 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
               setState(() => isLoading = false);
 
-              EHelperFunctions.navigateToScreen(
-                context,
-                CheckInSuccessScreen(
-                  userName: widget.userName,
-                  checkInTime: DateTime.now(),
-                  emoji: _selectedEmotion!,
-                  label: _selectedLabel!,
-                  feeling: _feelingController.text,
-                ),
-              );
+              if(isSuccess){
+                EHelperFunctions.navigateToScreen(
+                  context,
+                  CheckInSuccessScreen(
+                    userName: widget.userName,
+                    checkInTime: DateTime.now(),
+                    emoji: _selectedEmotion!,
+                    label: _selectedLabel!,
+                    feeling: _feelingController.text,
+                  ),
+                );
+              }
             }
-          : null, // Disable button while loading
+          : null,
       placeholder: isLoading
           ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -313,7 +315,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
           onTap: () {
             setState(() {
               _selectedLabel = emotion['label'];
-              _selectedEmotion = emotion['icon']; // Select emotion
+              _selectedEmotion = emotion['icon'];
             });
           },
           child: Container(

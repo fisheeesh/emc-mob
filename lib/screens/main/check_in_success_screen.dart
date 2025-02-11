@@ -153,11 +153,7 @@ class CheckInSuccessScreen extends StatelessWidget {
   Widget _backToHomButton(BuildContext context) {
     return CustomElevatedButton(
         onPressed: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-                (route) => false,
-          );
+          Navigator.pop(context);
         },
         placeholder: Text(
           ETexts.HOME,
