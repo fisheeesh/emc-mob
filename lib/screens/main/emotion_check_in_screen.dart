@@ -94,7 +94,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double topPadding = MediaQuery.of(context).size.height * 0.07;
+    double topPadding = MediaQuery.of(context).size.height * 0.06;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -103,7 +103,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
-                    left: ESizes.md, right: ESizes.md, top: topPadding),
+                    left: ESizes.md, right: ESizes.md, top: topPadding, bottom: ESizes.md),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -137,12 +137,12 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 15),
+                SizedBox(height: EHelperFunctions.isIOS() ? 15 : 10,),
 
                 /// Feeling Text Field
                 _feelingTextField(),
 
-                const SizedBox(height: 20,),
+                SizedBox(height: EHelperFunctions.isIOS() ? 25 : 10,),
                 /// submit button
                 _submitButton(),
               ],

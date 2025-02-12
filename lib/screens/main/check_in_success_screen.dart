@@ -2,6 +2,7 @@ import 'package:emotion_check_in_app/components/buttons/custom_elevated_button.d
 import 'package:emotion_check_in_app/utils/constants/colors.dart';
 import 'package:emotion_check_in_app/utils/constants/sizes.dart';
 import 'package:emotion_check_in_app/utils/constants/text_strings.dart';
+import 'package:emotion_check_in_app/utils/helpers/helper_functions.dart';
 import 'package:emotion_check_in_app/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -46,7 +47,7 @@ class CheckInSuccessScreen extends StatelessWidget {
 
               /// User check-in info
               _checkInInfoCard(),
-              const SizedBox(height: 120),
+              SizedBox(height:EHelperFunctions.isIOS() ? 95 : 120),
 
               /// Back to Home Button
               _backToHomButton(context)
