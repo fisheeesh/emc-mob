@@ -1,15 +1,15 @@
 class EUrls {
   /// ANDROID
   static const String AUTHORIZATION_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/auth';
+      'https://172.25.60.9:8443/security/auth';
   static const String LOGIN_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/login';
+      'https://172.25.60.9:8443/security/login';
   static const String REFRESH_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/refresh';
+      'https://172.25.60.9:8443/security/refresh';
   static const String HISTORY_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/mobile/checkins';
+      'https://172.25.60.9:8443/mobile/checkins';
   static const String CHECK_IN_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/mobile/checkin';
+      'https://172.25.60.9:8443/mobile/checkin';
 
   /// IOS
   static const String AUTHORIZATION_ENDPOINT_IOS =

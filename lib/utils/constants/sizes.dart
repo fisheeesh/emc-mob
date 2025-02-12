@@ -25,7 +25,7 @@ class ESizes {
   static const double hXs = 20;
   static const double hNormal = 55;
   static const double hSm = 100;
-  static const double hMd = 290;
+  static const double hMd = 285;
   static const double hLg = 500;
 
   // Border radius

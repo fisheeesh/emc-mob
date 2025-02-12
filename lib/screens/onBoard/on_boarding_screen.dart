@@ -109,18 +109,24 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
+  void _goToPage(int page) {
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
   CustomButton _nextButton() {
     return CustomButton(
-        width: ESizes.wFull,
-        height: ESizes.hNormal,
-        child: Text(
-          ETexts.NEXT,
-          style: ETextTheme.lightTextTheme.titleLarge,
-        ),
-        onPressed: () {
-          _pageController.nextPage(
-              duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-        });
+      width: ESizes.wFull,
+      height: ESizes.hNormal,
+      child: Text(
+        ETexts.NEXT,
+        style: ETextTheme.lightTextTheme.titleLarge,
+      ),
+      onPressed: () => _goToPage(1),
+    );
   }
 
   CustomButton _toLogInPageButton(BuildContext context) {
@@ -143,13 +149,10 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       width: ESizes.wNormal,
       height: ESizes.hNormal,
       child: TextButton(
-        onPressed: () {
-          _pageController.previousPage(
-              duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-        },
+        onPressed: () => _goToPage(0),
         style: TextButton.styleFrom(
           backgroundColor: EColors.lightBlue,
-          shape: CircleBorder(),
+          shape: const CircleBorder(),
         ),
         child: Padding(
           padding: const EdgeInsets.only(left: ESizes.xs),
@@ -188,35 +191,36 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   SmoothPageIndicator _smoothIndicator() {
     return SmoothPageIndicator(
-        onDotClicked: (index) => _pageController.animateToPage(index,
-            duration: Duration(milliseconds: 500), curve: Curves.easeInOut),
-        effect: ExpandingDotsEffect(
-          activeDotColor: EColors.activeDotColor,
-          dotColor: EColors.dotColor,
-          dotHeight: 5,
-          dotWidth: 16,
-        ),
-        controller: _pageController,
-        count: 2);
+      controller: _pageController,
+      count: 2,
+      onDotClicked: (index) => _goToPage(index),
+      effect: const ExpandingDotsEffect(
+        activeDotColor: EColors.activeDotColor,
+        dotColor: EColors.dotColor,
+        dotHeight: 5,
+        dotWidth: 16,
+      ),
+    );
   }
 
   Padding _pageViewSection() {
+    double topPadding = MediaQuery.of(context).size.height * 0.26;
+
     return Padding(
-      padding: const EdgeInsets.only(
-          left: ESizes.lg, right: ESizes.lg, top: ESizes.xxxl),
+      padding: EdgeInsets.only(left: ESizes.lg, right: ESizes.lg, top: topPadding),
       child: SizedBox(
         height: ESizes.hLg,
         width: ESizes.wLg,
         child: PageView(
-          onPageChanged: (index) => {
+          controller: _pageController,
+          onPageChanged: (index) {
             setState(() {
               onLastPage = (index == 1);
-            })
+            });
           },
-          controller: _pageController,
           children: [
-            Image.asset(EImages.onBoardingPage1),
-            Image.asset(EImages.onBoardingPage2),
+            _preloadImage(EImages.onBoardingPage1),
+            _preloadImage(EImages.onBoardingPage2),
           ],
         ),
       ),
@@ -244,6 +248,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           EImages.phone,
         ),
       ),
+    );
+  }
+
+  Widget _preloadImage(String imagePath) {
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.contain,
+      gaplessPlayback: true,
     );
   }
 }
