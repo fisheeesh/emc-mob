@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<CheckInProvider>(context, listen: false).loadCheckInsFromDB();
   }
 
-  DateTime _selectedDay = DateTime.now();
+  DateTime _selectedDay = DateTime(2000, 1, 1);
   DateTime _focusedDay = DateTime.now();
 
   /// Greet to users according to time zone
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
           firstDay: DateTime.utc(2000, 1, 1),
           lastDay: DateTime.utc(2100, 12, 31),
           focusedDay: _focusedDay,
-          selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+          selectedDayPredicate: (day) => _selectedDay.year != 2000 && isSameDay(day, _selectedDay),
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
               _selectedDay = selectedDay;
@@ -216,71 +216,45 @@ class _HomeScreenState extends State<HomeScreen> {
             rightChevronIcon: Icon(Icons.chevron_right, color: EColors.dark),
           ),
           calendarStyle: CalendarStyle(
-            /// Remove the days from other month
             outsideDaysVisible: false,
             defaultTextStyle: const TextStyle(color: EColors.dark),
             weekendTextStyle: const TextStyle(color: EColors.dark),
-            todayDecoration: BoxDecoration(),
-
-            /// No highlight for today
-            selectedDecoration: BoxDecoration(),
-
-            /// No highlight for default selection
-            rangeHighlightColor: Colors.transparent,
-
-            /// No range highlight
-            markerDecoration: BoxDecoration(),
-
-            /// No default markers
+            todayDecoration: const BoxDecoration(), // No highlight for today
+            selectedDecoration: const BoxDecoration(), // No default highlight
+            rangeHighlightColor: Colors.transparent, // No range highlight
+            markerDecoration: const BoxDecoration(), // No default markers
             cellMargin: const EdgeInsets.all(4),
           ),
           availableGestures: AvailableGestures.horizontalSwipe,
-
-          /// Highlight each day with custom colors
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (context, day, focusedDay) {
-              /// Always set the day text color to black
-              return Center(
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(color: EColors.dark),
-                ),
-              );
+              return _buildDayCell(day, checkInTypeMap);
             },
             selectedBuilder: (context, day, focusedDay) {
-              /// Handle selection style based on check-in type
-              final checkInType =
-                  checkInTypeMap[DateTime(day.year, day.month, day.day)];
-
-              if (checkInType == EColors.onTimeColor) {
-                return _buildHighlightedDay(day, EColors.onTimeColor);
-              } else if (day.isAfter(DateTime.now())) {
-                /// Upcoming days
-                return _buildHighlightedDay(day, EColors.lightBlue);
-              } else {
-                /// Default highlight for unlisted or past days
-                return _buildHighlightedDay(day, EColors.lightBlue);
-              }
+              return _buildHighlightedDay(day, EColors.lightBlue);
             },
-            markerBuilder: (context, day, events) {
-              /// Highlight the day based on check-in type
-              final checkInType =
-                  checkInTypeMap[DateTime(day.year, day.month, day.day)];
-
-              if (checkInType == EColors.onTimeColor) {
-                return _buildHighlightedDay(day, EColors.onTimeColor);
-              }
-
-              /// Default text for days without check-in
-              return Center(
-                child: Text(
-                  '${day.day}',
-                  style: const TextStyle(color: EColors.dark),
-                ),
-              );
+            todayBuilder: (context, day, focusedDay) {
+              final hasCheckIn =
+              checkInTypeMap.containsKey(DateTime(day.year, day.month, day.day));
+              return _buildTodayHighlight(day, hasCheckIn);
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDayCell(DateTime day, Map<DateTime, Color> checkInTypeMap) {
+    final checkInColor = checkInTypeMap[DateTime(day.year, day.month, day.day)];
+
+    if (checkInColor != null) {
+      return _buildHighlightedDay(day, checkInColor);
+    }
+
+    return Center(
+      child: Text(
+        '${day.day}',
+        style: const TextStyle(color: EColors.dark),
       ),
     );
   }
@@ -293,6 +267,32 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            '${day.day}',
+            style: const TextStyle(
+              color: EColors.dark,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTodayHighlight(DateTime day, bool hasCheckIn) {
+    return Center(
+      child: Container(
+        width: 35,
+        height: 35,
+        decoration: BoxDecoration(
+          color: hasCheckIn ? EColors.onTimeColor : Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: EColors.onTimeColor,
+            width: hasCheckIn ? 0 : 2, // Stroke only if no check-in data
+          ),
         ),
         child: Center(
           child: Text(
