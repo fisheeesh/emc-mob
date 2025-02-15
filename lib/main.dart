@@ -1,4 +1,3 @@
-import 'package:emotion_check_in_app/demo/emotion_check_in_provider.dart';
 import 'package:emotion_check_in_app/provider/check_in_provider.dart';
 import 'package:emotion_check_in_app/provider/login_provider.dart';
 import 'package:emotion_check_in_app/screens/auth/login_screen.dart';
@@ -42,7 +41,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => loginProvider),
-        ChangeNotifierProvider(create: (_) => EmotionCheckInProvider()),
         ChangeNotifierProvider(create: (_) => checkInProvider),
       ],
       child: MyApp(isUserLoggedIn: isUserLoggedIn),

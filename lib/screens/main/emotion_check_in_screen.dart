@@ -71,7 +71,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     ],
   };
   static const int _maxCharacters = 100;
-  int _currentCharacterCount = 0; // Starts from 0
+  int _currentCharacterCount = 0;
 
   @override
   void initState() {
@@ -127,7 +127,10 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                   child: Column(
                     children: [
                       // Tab Bar
-                      _tabBarSection(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: _tabBarSection(),
+                      ),
                       SizedBox(
                         height: 10,
                       ),
@@ -294,43 +297,52 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
   }
 
   Widget _tabBarSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildTabItem(0, "Negative"),
-        _buildTabItem(1, "Neutral"),
-        _buildTabItem(2, "Positive"),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(color: Color(0xFFBAD6FE), width: 1.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTabItem(0, "Negative", isFirst: true),
+          _buildTabItem(1, "Neutral"),
+          _buildTabItem(2, "Positive", isLast: true),
+        ],
+      ),
     );
   }
 
-  Widget _buildTabItem(int index, String label) {
+  Widget _buildTabItem(int index, String label, {bool isFirst = false, bool isLast = false}) {
     final isSelected = _selectedTabIndex == index;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTabIndex = index;
-
-          /// Reset selection when switching tabs
-          _selectedEmotion = null;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: isSelected ? EColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: EColors.primary),
-        ),
-        child: Text(
-          label,
-
-          /// @TODO: Apply Google Font
-          style: TextStyle(
-            color: isSelected ? EColors.white : EColors.primary,
-            fontWeight: FontWeight.bold,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedTabIndex = index;
+            _selectedEmotion = null;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Color(0xFFBAD6FE) : Color(0xFFF7F8F8),
+            borderRadius: BorderRadius.horizontal(
+              left: isFirst ? const Radius.circular(20) : Radius.zero,
+              right: isLast ? const Radius.circular(20) : Radius.zero,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: GoogleFonts.lexend(
+              textStyle: TextStyle(
+                color: isSelected ? Color(0xFF3085FE) : Color(0xFF87878B),
+                fontSize: 12,
+              )
+            ),
           ),
         ),
       ),
@@ -379,7 +391,7 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
                   emotion['icon'],
                   style: const TextStyle(fontSize: 28),
                 ),
-                const SizedBox(height: 2),
+
                 Text(
                   emotion['label'],
                   style: const TextStyle(fontSize: 12),

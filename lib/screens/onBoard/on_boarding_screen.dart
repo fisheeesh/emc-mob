@@ -219,8 +219,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             });
           },
           children: [
-            _preloadImage(EImages.onBoardingPage1),
-            _preloadImage(EImages.onBoardingPage2),
+            _preloadImage(EImages.onBoardingIntro1),
+            _preloadImage(EImages.onBoardingIntro2),
           ],
         ),
       ),

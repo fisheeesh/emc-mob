@@ -13,15 +13,15 @@ class EUrls {
 
   /// IOS
   static const String AUTHORIZATION_ENDPOINT_IOS =
-      'https://172.25.47.196:8443/security/auth';
+      'https://192.168.1.185:8443/security/auth';
   static const String LOGIN_ENDPOINT_IOS =
-      'https://172.25.47.196:8443/security/login';
+      'https://192.168.1.185:8443/security/login';
   static const String REFRESH_ENDPOINT_IOS =
-      'https://172.25.47.196:8443/security/refresh';
+      'https://192.168.1.185:8443/security/refresh';
   static const String HISTORY_ENDPOINT_IOS =
-      'https://172.25.47.196:8443/mobile/checkins';
+      'https://192.168.1.185:8443/mobile/checkins';
   static const String CHECK_IN_ENDPOINT_IOS =
-      'https://172.25.47.196:8443/mobile/checkin';
+      'https://192.168.1.185:8443/mobile/checkin';
 
   /// HTTP method
   static const String GET = "GET";
