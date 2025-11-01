@@ -1,6 +1,6 @@
-# emotion_check_in_app
+# emc_mob
 
-ATA - Emotion Check-in Application
+A new Flutter project.
 
 ## Getting Started
 
