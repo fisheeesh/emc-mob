@@ -216,65 +216,66 @@ class _EmotionCheckInScreenState extends State<EmotionCheckInScreen> {
     return CustomElevatedButton(
       onPressed: _selectedEmotion != null && !isLoading
           ? () async {
-              setState(() => isLoading = true);
+        setState(() => isLoading = true);
 
-              var isSuccess = await context.read<CheckInProvider>().sendCheckIn(
-                    context,
-                    _selectedLabel!,
-                    _feelingController.text,
-                  );
+        var isSuccess = await context.read<CheckInProvider>().sendCheckIn(
+          context,
+          _selectedEmotion!,
+          _selectedLabel!,
+          _feelingController.text,
+        );
 
-              setState(() => isLoading = false);
+        setState(() => isLoading = false);
 
-              if (isSuccess) {
-                EHelperFunctions.navigateToScreen(
-                  context,
-                  CheckInSuccessScreen(
-                    userName: widget.userName,
-                    checkInTime: DateTime.now(),
-                    emoji: _selectedEmotion!,
-                    label: _selectedLabel!,
-                    feeling: _feelingController.text,
-                  ),
-                );
-              }
-            }
+        if (isSuccess) {
+          EHelperFunctions.navigateToScreen(
+            context,
+            CheckInSuccessScreen(
+              userName: widget.userName,
+              checkInTime: DateTime.now(),
+              emoji: _selectedEmotion!,
+              label: _selectedLabel!,
+              feeling: _feelingController.text,
+            ),
+          );
+        }
+      }
           : null,
       placeholder: isLoading
           ? Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: 18,
-                  width: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  ETexts.SUBMITTING,
-                  style: GoogleFonts.lexend(
-                    textStyle: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: EColors.white,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : Text(
-              ETexts.SUBMIT,
-              style: GoogleFonts.lexend(
-                textStyle: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: EColors.white,
-                ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 18,
+            width: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            ETexts.SUBMITTING,
+            style: GoogleFonts.lexend(
+              textStyle: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: EColors.white,
               ),
             ),
+          ),
+        ],
+      )
+          : Text(
+        ETexts.SUBMIT,
+        style: GoogleFonts.lexend(
+          textStyle: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: EColors.white,
+          ),
+        ),
+      ),
     );
   }
 
