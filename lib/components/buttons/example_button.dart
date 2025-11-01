@@ -1,5 +1,5 @@
-import 'package:emotion_check_in_app/utils/constants/colors.dart';
-import 'package:emotion_check_in_app/utils/constants/sizes.dart';
+import 'package:emc_mob/utils/constants/colors.dart';
+import 'package:emc_mob/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
 
 class CustomElevatedButton extends StatelessWidget {
