@@ -18,6 +18,12 @@ class EColors {
   static const Color lightBlue = Color(0xFFDCEAFE);
   static const Color buttonDisabled = Color(0xFFC4C4C4);
 
+  // Emotion Colors
+  static const Color positive = Color(0xFF22c55e);
+  static const Color neutral = Color(0xFFa855f7);
+  static const Color negative = Color(0xFFf97316);
+  static const Color critical = Color(0xFFef4444);
+
   // dot indicator
   static const Color activeDotColor = Color(0xFF3085FE);
   static const Color dotColor = Color(0xFFBAD6FE);

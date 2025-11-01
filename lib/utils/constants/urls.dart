@@ -1,32 +1,25 @@
 class EUrls {
+  /// Base URLs
+  static const String BASE_URL = "https://10.0.2.2:8080";
+  static const String IOS_BASE_URL = "https://192.168.1.185:8080";
+  static const String PROD_URL = "https://api.emotioncheckinsystem.com";
+
   /// ANDROID
-  static const String AUTHORIZATION_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/auth';
-  static const String LOGIN_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/login';
-  static const String REFRESH_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/security/refresh';
-  static const String HISTORY_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/mobile/checkins';
-  static const String CHECK_IN_ENDPOINT_ANDROID =
-      'https://10.0.2.2:8443/mobile/checkin';
+  static const String LOGIN_ENDPOINT_ANDROID = '$PROD_URL/api/v1/login';
+  static const String HISTORY_ENDPOINT_ANDROID = '$PROD_URL/api/v1/user/my-history';
+  static const String CHECK_IN_ENDPOINT_ANDROID = '$PROD_URL/api/v1/user/check-in';
 
   /// IOS
-  static const String AUTHORIZATION_ENDPOINT_IOS =
-      'https://192.168.1.185:8443/security/auth';
-  static const String LOGIN_ENDPOINT_IOS =
-      'https://192.168.1.185:8443/security/login';
-  static const String REFRESH_ENDPOINT_IOS =
-      'https://192.168.1.185:8443/security/refresh';
-  static const String HISTORY_ENDPOINT_IOS =
-      'https://192.168.1.185:8443/mobile/checkins';
-  static const String CHECK_IN_ENDPOINT_IOS =
-      'https://192.168.1.185:8443/mobile/checkin';
+  static const String LOGIN_ENDPOINT_IOS = '$PROD_URL/api/v1/login';
+  static const String HISTORY_ENDPOINT_IOS = '$PROD_URL/api/v1/user/my-history';
+  static const String CHECK_IN_ENDPOINT_IOS = '$PROD_URL/api/v1/user/check-in';
 
-  /// HTTP method
-  static const String GET = "GET";
-  static const String POST = "POST";
+  /// Development Endpoints
+  static const String DEV_LOGIN_ENDPOINT_ANDROID = '$BASE_URL/api/v1/login';
+  static const String DEV_HISTORY_ENDPOINT_ANDROID = '$BASE_URL/api/v1/user/my-history';
+  static const String DEV_CHECK_IN_ENDPOINT_ANDROID = '$BASE_URL/api/v1/user/check-in';
 
-  /// JWT
-  static const BEARER = "Bearer ";
+  static const String DEV_LOGIN_ENDPOINT_IOS = '$IOS_BASE_URL/api/v1/login';
+  static const String DEV_HISTORY_ENDPOINT_IOS = '$IOS_BASE_URL/api/v1/user/my-history';
+  static const String DEV_CHECK_IN_ENDPOINT_IOS = '$IOS_BASE_URL/api/v1/user/check-in';
 }
