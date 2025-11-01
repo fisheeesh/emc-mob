@@ -37,14 +37,32 @@ class DatabaseHelper {
       final path = join(await getDatabasesPath(), 'checkins.db');
       return await openDatabase(
         path,
-        version: 1,
+        version: 3, // Increment version for schema change
         onCreate: (db, version) async {
           await db.execute('''
             CREATE TABLE IF NOT EXISTS checkins (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
-              timestamp TEXT NOT NULL
+              emoji TEXT NOT NULL,
+              textFeeling TEXT NOT NULL,
+              createdAt TEXT NOT NULL,
+              checkInTime TEXT NOT NULL
             )
           ''');
+        },
+        onUpgrade: (db, oldVersion, newVersion) async {
+          if (oldVersion < 3) {
+            // Migrate from old schema to new schema (no status field)
+            await db.execute('DROP TABLE IF EXISTS checkins');
+            await db.execute('''
+              CREATE TABLE checkins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                emoji TEXT NOT NULL,
+                textFeeling TEXT NOT NULL,
+                createdAt TEXT NOT NULL,
+                checkInTime TEXT NOT NULL
+              )
+            ''');
+          }
         },
       );
     } catch (e) {
