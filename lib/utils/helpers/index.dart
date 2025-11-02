@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:emc_mob/utils/constants/text_strings.dart';
+import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -12,6 +13,19 @@ class EHelperFunctions {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  static String getBaseUrl() {
+    return isIOS()
+        ? EUrls.IOS_BASE_URL
+        : EUrls.BASE_URL;
+  }
+
+  static double getProportionateHeight(BuildContext context, double fraction) {
+    final height = MediaQuery.of(context).size.height;
+    if (height > 800) return height * (fraction - 0.03);
+    if (height < 700) return height * (fraction + 0.03);
+    return height * fraction;
   }
 
   static void showAlert(BuildContext context, String title, String message) {
