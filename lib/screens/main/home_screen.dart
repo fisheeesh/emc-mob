@@ -9,6 +9,7 @@ import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:emc_mob/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -222,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${checkIn.createdAt.hour}:${checkIn.createdAt.minute.toString().padLeft(2, '0')}',
+                  DateFormat('h:mm a').format(checkIn.createdAt),
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     color: EColors.dark.withOpacity(0.7),

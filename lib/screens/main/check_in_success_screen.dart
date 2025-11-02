@@ -5,6 +5,7 @@ import 'package:emc_mob/utils/constants/text_strings.dart';
 import 'package:emc_mob/utils/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 class CheckInSuccessScreen extends StatelessWidget {
   final String userName;
@@ -39,6 +40,7 @@ class CheckInSuccessScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 60),
             /// Checkmark Icon
             _successIcon(),
             const SizedBox(height: 20),
@@ -80,8 +82,12 @@ class CheckInSuccessScreen extends StatelessWidget {
           Text(ETexts.TIME, style: ETextTheme.lightTextTheme.labelMedium),
           const SizedBox(height: 10),
           Text(
-            "${checkInTime.hour}:${checkInTime.minute.toString().padLeft(2, '0')}",
-            style: ETextTheme.lightTextTheme.headlineMedium,
+            DateFormat('h:mm a').format(checkInTime),
+            style: GoogleFonts.lexend(
+              fontSize: 16,
+              color: EColors.dark.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
 
