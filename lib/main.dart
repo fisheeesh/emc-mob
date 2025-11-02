@@ -1,5 +1,6 @@
 import 'package:emc_mob/providers/check_in_provider.dart';
 import 'package:emc_mob/providers/emotion_provider.dart';
+import 'package:emc_mob/providers/employee_provider.dart';
 import 'package:emc_mob/providers/login_provider.dart';
 import 'package:emc_mob/screens/splash/animated_splash_screen.dart';
 import 'package:emc_mob/utils/theme/index.dart';
@@ -35,6 +36,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => loginProvider),
         ChangeNotifierProvider(create: (_) => checkInProvider),
         ChangeNotifierProvider(create: (_) => EmotionProvider()),
+        ChangeNotifierProvider(create: (_) => EmployeeProvider()),
       ],
       child: const MyApp(),
     ),

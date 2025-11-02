@@ -6,6 +6,56 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class EHelperFunctions {
+  static String generateEmployeeId(int id, {String prefix = "ATA"}) {
+    if (id < 1 || id > 9999) {
+      throw ArgumentError("Employee ID must be between 1 and 9999");
+    }
+    return "$prefix-${id.toString().padLeft(4, '0')}";
+  }
+
+  static String getInitialName(String fullName) {
+    if (fullName.isEmpty) return "";
+
+    final nameParts = fullName.trim().split(" ");
+    if (nameParts.isEmpty) return "";
+
+    if (nameParts.length == 1) {
+      return nameParts[0].substring(0, 1).toUpperCase();
+    }
+
+    final firstInitial = nameParts[0].isNotEmpty
+        ? nameParts[0].substring(0, 1).toUpperCase()
+        : "";
+    final lastInitial = nameParts[1].isNotEmpty
+        ? nameParts[1].substring(0, 1).toUpperCase()
+        : "";
+
+    return "$firstInitial$lastInitial";
+  }
+
+  static String formatPhoneNumber(String phone) {
+    if (phone.isEmpty) return "NULL";
+
+    final cleaned = phone.replaceAll(RegExp(r'\D'), '');
+
+    if (cleaned.startsWith("959") && cleaned.length == 12) {
+      return "+${cleaned.substring(0, 3)} ${cleaned.substring(3, 6)} ${cleaned.substring(6, 9)} ${cleaned.substring(9)}";
+    }
+
+    if (cleaned.startsWith("09")) {
+      return "${cleaned.substring(0, 2)} ${cleaned.substring(2, 5)} ${cleaned.substring(5, 8)} ${cleaned.substring(8)}";
+    }
+
+    if (cleaned.length > 10) {
+      final countryCode = cleaned.substring(0, cleaned.length - 10);
+      final rest = cleaned.substring(cleaned.length - 10);
+      return "+$countryCode ${rest.substring(0, 3)} ${rest.substring(3, 6)} ${rest.substring(6)}";
+    }
+
+    return phone;
+  }
+
+
   static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -18,7 +68,7 @@ class EHelperFunctions {
   static String getBaseUrl() {
     return isIOS()
         ? EUrls.IOS_BASE_URL
-        : EUrls.BASE_URL;
+        : EUrls.ANDROID_BASE_URL;
   }
 
   static double getProportionateHeight(BuildContext context, double fraction) {

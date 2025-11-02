@@ -2,6 +2,7 @@ import 'package:emc_mob/components/buttons/custom_elevated_button.dart';
 import 'package:emc_mob/providers/check_in_provider.dart';
 import 'package:emc_mob/providers/login_provider.dart';
 import 'package:emc_mob/screens/main/emotion_check_in_screen.dart';
+import 'package:emc_mob/screens/main/profile_screen.dart';
 import 'package:emc_mob/utils/constants/colors.dart';
 import 'package:emc_mob/utils/constants/sizes.dart';
 import 'package:emc_mob/utils/constants/text_strings.dart';
@@ -65,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Greeting and Logout Button
+            /// Greeting and Settings Button
             _headerSection(userName, context),
             const SizedBox(height: 20),
 
@@ -445,74 +446,34 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(userName, style: ETextTheme.lightTextTheme.labelLarge),
           ],
         ),
-        _logOutButton(context),
+        _settingsButton(context),
       ],
     );
   }
 
-  OutlinedButton _logOutButton(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () async {
-        /// Show confirmation dialog
-        final shouldLogout = await _showLogoutConfirmationDialog(context);
-
-        if (shouldLogout && context.mounted) {
-          /// Handle logout
-          await context.read<LoginProvider>().logout(context);
-        }
-      },
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: EColors.lightGary, width: 1.5),
-        foregroundColor: EColors.danger,
-      ),
-      child: Text(
-        ETexts.LOGOUT,
-        style: GoogleFonts.lexend(
-          textStyle: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Future<bool> _showLogoutConfirmationDialog(BuildContext context) async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: EColors.white,
-          title: Text(
-            ETexts.LOGOUT_TITLE,
-            style: ETextTheme.lightTextTheme.headlineMedium,
+  /// Settings button to navigate to profile screen
+  IconButton _settingsButton(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ProfileScreen(),
           ),
-          content: Text(
-            ETexts.LOGOUT_CONTENT,
-            style: ETextTheme.lightTextTheme.titleSmall,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                /// Dismiss the dialog and return false
-                Navigator.of(context).pop(false);
-              },
-              child: const Text(
-                ETexts.CANCEL,
-                style: TextStyle(color: EColors.black),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                /// Dismiss the dialog and return true
-                Navigator.of(context).pop(true);
-              },
-              child: const Text(
-                ETexts.OK,
-                style: TextStyle(color: EColors.black),
-              ),
-            ),
-          ],
         );
       },
-    ) ??
-        false;
+      icon: Icon(
+        Icons.settings,
+        color: EColors.dark,
+        size: 28,
+      ),
+      style: IconButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: EColors.lightGary, width: 1.5),
+        ),
+        padding: const EdgeInsets.all(8),
+      ),
+    );
   }
 }
