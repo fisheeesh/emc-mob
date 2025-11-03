@@ -5,6 +5,7 @@ import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class EmployeeService {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -74,6 +75,7 @@ class EmployeeService {
       request.fields['lastName'] = lastName;
       request.fields['phone'] = phone;
       request.fields['gender'] = gender;
+
       final birthdateUtc = DateTime.utc(
         birthdate.year,
         birthdate.month,
@@ -82,22 +84,64 @@ class EmployeeService {
       request.fields['birthdate'] = birthdateUtc.toIso8601String();
 
       debugPrint('Sending birthdate: ${birthdateUtc.toIso8601String()}');
+      debugPrint('Avatar file provided: ${avatarFile != null}');
 
       /// Add avatar file if provided
       if (avatarFile != null) {
-        var avatarStream = http.ByteStream(avatarFile.openRead());
-        var avatarLength = await avatarFile.length();
-        var multipartFile = http.MultipartFile(
+        debugPrint('Adding avatar file: ${avatarFile.path}');
+
+        final fileExists = await avatarFile.exists();
+        debugPrint('File exists: $fileExists');
+
+        if (!fileExists) {
+          throw Exception('Avatar file does not exist at path: ${avatarFile.path}');
+        }
+
+        /// Get file extension
+        String fileName = avatarFile.path.split('/').last;
+
+        /// Determine content type based on file extension
+        String contentType = 'image/jpeg';
+        if (fileName.toLowerCase().endsWith('.png')) {
+          contentType = 'image/png';
+        } else if (fileName.toLowerCase().endsWith('.jpg') || fileName.toLowerCase().endsWith('.jpeg')) {
+          contentType = 'image/jpeg';
+        } else if (fileName.toLowerCase().endsWith('.webp')) {
+          contentType = 'image/webp';
+        }
+
+        debugPrint('File content type: $contentType');
+        debugPrint('File size: ${await avatarFile.length()} bytes');
+
+        /// Use http.MultipartFile.fromPath with explicit contentType
+        var multipartFile = await http.MultipartFile.fromPath(
           'avatar',
-          avatarStream,
-          avatarLength,
-          filename: avatarFile.path.split('/').last,
+          avatarFile.path,
+          filename: fileName,
+          contentType: MediaType.parse(contentType),
         );
+
         request.files.add(multipartFile);
+        debugPrint('Avatar file added to request');
+        debugPrint('Multipart filename: ${multipartFile.filename}');
+        debugPrint('Multipart length: ${multipartFile.length}');
+        debugPrint('Multipart field: ${multipartFile.field}');
+        debugPrint('Multipart contentType: ${multipartFile.contentType}');
+      }
+
+      debugPrint('Sending request to: ${request.url}');
+      debugPrint('Request fields: ${request.fields}');
+      debugPrint('Request files count: ${request.files.length}');
+      if (request.files.isNotEmpty) {
+        debugPrint('File field name: ${request.files.first.field}');
+        debugPrint('File name: ${request.files.first.filename}');
       }
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -107,6 +151,7 @@ class EmployeeService {
         throw Exception(errorData['message'] ?? 'Failed to update employee data');
       }
     } catch (e) {
+      debugPrint('Error in updateEmployeeData: $e');
       throw Exception('Error updating employee data: $e');
     }
   }
