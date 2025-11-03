@@ -8,10 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:emc_mob/database/db_helper.dart';
 
-/// The entry point of the ATA-EmotionCheck-in application.
-///
-/// This method initializes essential services, checks user authentication status,
-/// and determines the appropriate starting screen before launching the app.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

@@ -37,38 +37,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: employeeProvider.isLoading
           ? const Center(
-              child: CircularProgressIndicator(
-                color: EColors.primary,
-                strokeWidth: 3.0,
-              ),
-            )
+        child: CircularProgressIndicator(
+          color: EColors.primary,
+          strokeWidth: 3.0,
+        ),
+      )
           : employeeProvider.errorMessage != null
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: EColors.danger),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Failed to load profile',
-                    style: ETextTheme.lightTextTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    employeeProvider.errorMessage ?? 'Unknown error',
-                    style: ETextTheme.lightTextTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      employeeProvider.fetchEmployeeData();
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: EColors.danger),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load profile',
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 62.0),
+              child: Text(
+                employeeProvider.errorMessage ?? 'Unknown error',
+                style: ETextTheme.lightTextTheme.bodyMedium,
+                textAlign: TextAlign.center,
               ),
-            )
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                employeeProvider.fetchEmployeeData();
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      )
           : employeeProvider.employee == null
           ? const Center(child: Text('No employee data available'))
           : _buildProfileContent(employeeProvider.employee!, loginProvider),
@@ -167,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Opacity(
                     opacity: 0.08,
                     child: Text(
-                      'ATA',
+                      'EMC',
                       style: GoogleFonts.lexend(
                         fontSize: 120,
                         fontWeight: FontWeight.w900,
@@ -371,25 +373,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoRow(
             Icons.business_center_outlined,
             'Job Type',
-            _formatJobType(employee.jobType),
+            EHelperFunctions.formatJobType(employee.jobType),
           ),
           const Divider(height: 24),
           _buildInfoRow(
             Icons.location_on_outlined,
             'Work Style',
-            _formatWorkStyle(employee.workStyle),
+            EHelperFunctions.formatWorkStyle(employee.workStyle),
           ),
           const Divider(height: 24),
           _buildInfoRow(
             Icons.person_outline,
             'Gender',
-            _formatGender(employee.gender),
+            EHelperFunctions.formatGender(employee.gender),
           ),
           const Divider(height: 24),
           _buildInfoRow(
             Icons.cake_outlined,
             'Birthdate',
-            employee.birthdate ?? 'Not Specified',
+            EHelperFunctions.formatDate(employee.birthdate),
           ),
         ],
       ),
@@ -473,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoRow(
             Icons.calendar_today_outlined,
             'Joined',
-            employee.createdAt,
+            EHelperFunctions.formatDate(employee.createdAt),
           ),
         ],
       ),
@@ -525,17 +527,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildLogoutButton(LoginProvider loginProvider) {
     return SizedBox(
       width: double.infinity,
-      child: OutlinedButton(
+      child: ElevatedButton(
         onPressed: () async {
           final shouldLogout = await _showLogoutConfirmationDialog();
           if (shouldLogout && mounted) {
             await loginProvider.logout(context);
           }
         },
-        style: OutlinedButton.styleFrom(
+        style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          side: BorderSide(color: EColors.danger, width: 1.5),
-          foregroundColor: EColors.danger,
+          backgroundColor: EColors.danger,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -561,95 +563,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// Logout confirmation dialog
   Future<bool> _showLogoutConfirmationDialog() async {
     return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: EColors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: EColors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            'Logout',
+            style: GoogleFonts.lexend(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: EColors.dark,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to logout?',
+            style: GoogleFonts.lexend(
+              fontSize: 15,
+              color: EColors.dark.withOpacity(0.7),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.lexend(
+                  color: EColors.dark,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              title: Text(
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
                 'Logout',
                 style: GoogleFonts.lexend(
-                  fontSize: 20,
+                  color: EColors.danger,
                   fontWeight: FontWeight.w600,
-                  color: EColors.dark,
                 ),
               ),
-              content: Text(
-                'Are you sure you want to logout?',
-                style: GoogleFonts.lexend(
-                  fontSize: 15,
-                  color: EColors.dark.withOpacity(0.7),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text(
-                    'Cancel',
-                    style: GoogleFonts.lexend(
-                      color: EColors.dark,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(
-                    'Logout',
-                    style: GoogleFonts.lexend(
-                      color: EColors.danger,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ) ??
+            ),
+          ],
+        );
+      },
+    ) ??
         false;
-  }
-
-  /// Format helper methods
-  String _formatJobType(String jobType) {
-    switch (jobType) {
-      case 'FULLTIME':
-        return 'Full Time';
-      case 'PARTTIME':
-        return 'Part Time';
-      case 'CONTRACT':
-        return 'Contract';
-      case 'INTERN':
-        return 'Intern';
-      default:
-        return jobType;
-    }
-  }
-
-  String _formatWorkStyle(String workStyle) {
-    switch (workStyle) {
-      case 'ONSITE':
-        return 'On-Site';
-      case 'REMOTE':
-        return 'Remote';
-      case 'HYBRID':
-        return 'Hybrid';
-      default:
-        return workStyle;
-    }
-  }
-
-  String _formatGender(String gender) {
-    switch (gender) {
-      case 'MALE':
-        return 'Male';
-      case 'FEMALE':
-        return 'Female';
-      case 'OTHER':
-        return 'Other';
-      default:
-        return gender;
-    }
   }
 }

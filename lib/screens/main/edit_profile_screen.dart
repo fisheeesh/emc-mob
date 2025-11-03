@@ -60,24 +60,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     /// Parse birthdate if exists
     if (widget.employee.birthdate != null && widget.employee.birthdate!.isNotEmpty) {
       try {
-        /// Try parsing with the format from backend
-        _selectedDate = DateFormat('MMMM d, yyyy').parse(widget.employee.birthdate!);
-        _birthdateController = TextEditingController(text: widget.employee.birthdate!);
-        debugPrint('Parsed birthdate: $_selectedDate');
-      } catch (e) {
-        debugPrint('Error parsing birthdate: $e');
-        /// If parsing fails, set a default date
-        _selectedDate = DateTime(2000, 1, 1);
+        /// Try parsing ISO format first
+        _selectedDate = DateTime.parse(widget.employee.birthdate!);
         _birthdateController = TextEditingController(
           text: DateFormat('MMMM d, yyyy').format(_selectedDate!),
         );
+        debugPrint('Parsed birthdate: $_selectedDate');
+      } catch (e) {
+        try {
+          /// Try parsing with display format
+          _selectedDate = DateFormat('MMMM d, yyyy').parse(widget.employee.birthdate!);
+          _birthdateController = TextEditingController(text: widget.employee.birthdate!);
+          debugPrint('Parsed birthdate from display format: $_selectedDate');
+        } catch (e2) {
+          debugPrint('Error parsing birthdate: $e2');
+          /// If parsing fails, leave empty
+          _selectedDate = null;
+          _birthdateController = TextEditingController(text: '');
+        }
       }
     } else {
-      /// Set default date if no birthdate
-      _selectedDate = DateTime(2000, 1, 1);
-      _birthdateController = TextEditingController(
-        text: DateFormat('MMMM d, yyyy').format(_selectedDate!),
-      );
+      _selectedDate = null;
+      _birthdateController = TextEditingController(text: '');
     }
   }
 
@@ -114,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime(2000),
+      initialDate: _selectedDate ?? DateTime(2000, 1, 1),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -155,6 +159,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
 
     debugPrint('Saving profile with birthdate: $_selectedDate');
+    debugPrint('Selected image: $_selectedImage');
 
     final employeeProvider = context.read<EmployeeProvider>();
 
@@ -170,11 +175,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     if (mounted) {
       if (success) {
-        EHelperFunctions.showSnackBar(
-          context,
-          'Profile updated successfully',
-        );
-        Navigator.pop(context);
+        await employeeProvider.fetchEmployeeData();
+
+        if (mounted) {
+          EHelperFunctions.showSnackBar(
+            context,
+            'Profile updated successfully',
+          );
+          Navigator.pop(context);
+        }
       } else {
         EHelperFunctions.showSnackBar(
           context,
@@ -548,7 +557,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               suffixIcon: Icon(Icons.calendar_today, color: EColors.primary, size: 20),
-              hintText: 'Select birthdate',
+              hintText: 'Please select date', // Updated placeholder
               hintStyle: GoogleFonts.lexend(
                 fontSize: 14,
                 color: EColors.dark.withOpacity(0.5),

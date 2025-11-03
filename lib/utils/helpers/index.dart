@@ -55,7 +55,6 @@ class EHelperFunctions {
     return phone;
   }
 
-
   static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -63,6 +62,19 @@ class EHelperFunctions {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  static String formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) {
+      return 'Not Specified';
+    }
+
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMMM dd, yyyy').format(date);
+    } catch (e) {
+      return dateStr;
+    }
   }
 
   static String getBaseUrl() {
@@ -117,5 +129,46 @@ class EHelperFunctions {
 
   static bool isAndroid() {
     return Platform.isAndroid;
+  }
+
+  static String formatJobType(String jobType) {
+    switch (jobType) {
+      case 'FULLTIME':
+        return 'Full Time';
+      case 'PARTTIME':
+        return 'Part Time';
+      case 'CONTRACT':
+        return 'Contract';
+      case 'INTERN':
+        return 'Intern';
+      default:
+        return jobType;
+    }
+  }
+
+  static String formatWorkStyle(String workStyle) {
+    switch (workStyle) {
+      case 'ONSITE':
+        return 'On-Site';
+      case 'REMOTE':
+        return 'Remote';
+      case 'HYBRID':
+        return 'Hybrid';
+      default:
+        return workStyle;
+    }
+  }
+
+  static String formatGender(String gender) {
+    switch (gender) {
+      case 'MALE':
+        return 'Male';
+      case 'FEMALE':
+        return 'Female';
+      case 'OTHER':
+        return 'Other';
+      default:
+        return gender;
+    }
   }
 }
