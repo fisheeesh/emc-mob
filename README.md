@@ -372,7 +372,11 @@ The system aims to create a holistic approach to workplace wellness by combining
 We would like to thank:
 - **ATA IT (Thailand)** for the initial project inspiration and collaboration opportunity
 - **Mae Fah Luang University** for academic guidance and support
-- All contributors and testers who helped shape this system
+- All my team members who helped shape this system to completion:
+  - **Swan Yi Phyo** (Full-Stack Developer/Mobile Developer) - 6531503187
+  - **Kaung Htut Hlaing** (Project Manager/Backend Developer) - 6531503145
+  - **Khun Shine Si Thu** (UI/UX Designer) - 6531503149
+  - **Myat Thu Kyaw** (Front-end Developer) - 6531503159
 
 ## 📱 Download
 
@@ -380,8 +384,6 @@ We would like to thank:
 <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" width="200"/>
 
 **Status**: App currently in review. Will be available soon!
-
-Stay tuned for the official release on the Google Play Store.
 
 ## 🔒 Privacy Policy
 
@@ -411,7 +413,5 @@ This project is licensed under the [MIT License](LICENSE).
 **Built with ❤️ by Software Engineering students at Mae Fah Luang University**
 
 *Creating healthier, more empathetic workplaces where every voice matters and every emotion counts.*
-
-*Last updated: November 2025*
 
 </div>
