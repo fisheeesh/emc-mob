@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:emc_mob/enums/tokens.dart';
 import 'package:emc_mob/providers/check_in_provider.dart';
 import 'package:emc_mob/screens/auth/login_screen.dart';
-import 'package:emc_mob/utils/constants/debug.dart';
-import 'package:emc_mob/utils/constants/status.dart';
 import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:flutter/material.dart';

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:emc_mob/database/db_helper.dart';
 import 'package:emc_mob/enums/tokens.dart';
 import 'package:emc_mob/providers/login_provider.dart';
-import 'package:emc_mob/utils/constants/status.dart';
 import 'package:emc_mob/utils/constants/urls.dart';
 import 'package:emc_mob/utils/helpers/index.dart';
 import 'package:flutter/material.dart';
