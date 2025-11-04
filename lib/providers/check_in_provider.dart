@@ -163,7 +163,7 @@ class CheckInProvider with ChangeNotifier {
     } else {
       debugPrint("Failed to send check-in: ${response?.statusCode} ${response?.body}");
       if (context.mounted) {
-        EHelperFunctions.showSnackBar(context, EStatus.COMMON_ERROR);
+        EHelperFunctions.showSnackBar(context, "Something went wrong!. Please try again later.");
       }
       return false;
     }

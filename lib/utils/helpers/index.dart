@@ -90,24 +90,6 @@ class EHelperFunctions {
     return height * fraction;
   }
 
-  static void showAlert(BuildContext context, String title, String message) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(ETexts.OK))
-            ],
-          );
-        });
-  }
-
   static void navigateToScreen(BuildContext context, Widget screen) {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (builder) => screen));

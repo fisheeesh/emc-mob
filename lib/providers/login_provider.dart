@@ -89,9 +89,9 @@ class LoginProvider with ChangeNotifier {
         }
       }
     } on TimeoutException {
-      debugPrint(EDebug.REQ_TIME_OUT);
+      debugPrint("Login timeout: The request took too long to respond.");
       if (context.mounted) {
-        EHelperFunctions.showSnackBar(context, EStatus.REQ_TIME_OUT);
+        EHelperFunctions.showSnackBar(context, "Request timed out. Please try again later.");
       }
     } catch (e) {
       debugPrint('Login error: $e');
@@ -120,7 +120,7 @@ class LoginProvider with ChangeNotifier {
       Duration timeUntilExpiry = expirationTime.difference(DateTime.now());
 
       if (timeUntilExpiry.isNegative) {
-        debugPrint(EDebug.REFRESH_EXP);
+        debugPrint("Refresh token has expired. User needs to log in again.");
         return false;
       }
 

@@ -1,15 +1,4 @@
 class ETexts {
-  // constants
-  static const String AUTHORIZATION = "authorization";
-  static const String REFRESH = "refresh";
-
-  // snack-bar text
-  static const String COMMON_ERROR =
-      "Something went wrong!. Please try again later.";
-  static const String REQ_TIME_OUT =
-      "Request timed out. Please try again later.";
-  static const String LOGOUT_SUCCESS = "Logout Successfully.";
-
   // onBoarding Texts
   static const String ONBOARDINGTITLE1 = 'Easy way to confirm your attendance';
   static const String ONBOARDINGTITLE2 =
@@ -28,9 +17,6 @@ class ETexts {
   static const String EMAIL = "Email Address";
   static const String PASSWORD = " Password";
 
-  // forgot pass
-  static const String FORGOTPW = "Forgot Password ?";
-
   // home screen
   static const String MORNING = "Good Morning,";
   static const String NOON = "Good Afternoon,";
@@ -41,8 +27,6 @@ class ETexts {
   static const String CHECK_IN = "Check In";
   static const String LOGOUT_TITLE = "Confirm Logout.";
   static const String LOGOUT_CONTENT = "Are you sure you want to log out?";
-  static const String OK = "OK";
-  static const String CANCEL = "Cancel";
   static const String NO_CHECK_IN = "You have not checked in on this day.";
 
   // check-in submission screen
@@ -54,7 +38,4 @@ class ETexts {
   static const String SUCCESS_MSG = "Check In Success!";
   static const String TIME = "Time";
   static const String HOME = "Home";
-
-  // leave confirm dialog
-  static const String LEAVE_TITLE = "Are you sure you want to leave?";
 }
